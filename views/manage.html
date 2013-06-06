@@ -1,23 +1,27 @@
 {% include 'snippetMacros.html' %}
-<div class="apos-modal apos-template apos-manage-person">
-  <h3>{% block action %}Manage People{% endblock %}</h3>
+<div class="apos-modal apos-template apos-manage-group">
+  <h3>{% block action %}Manage Groups{% endblock %}</h3>
   <div class="apos-modal-body">
-    <a href="#" class="apos-control apos-button apos-new-button apos-new-snippet-button" data-new-person>New Person</a>
+    <a href="#" class="apos-control apos-button apos-new-button apos-new-snippet-button" data-new-group>New Group</a>
     <div class="apos-modal-filters">
       {{ snippetFilters() }}
     </div>
     <table data-items class="apos-manage-table">
       <tr>
-        <th class="apos-manage-people-name">Name</th>
-        <th class="apos-manage-people-tags">Tags</th>
+        <th class="apos-manage-groups-name">Name</th>
+        <th class="apos-manage-groups-permissions">Permissions</th>
       </tr>
       <tr class="apos-template" data-item>
         <td>
-          <span><a href="#" data-edit-person data-name>Jane Q. Public</a></span>
+          {# Full names are stored in the "title" field for consistency among all #}
+          {# snippet subclasses. We call it a name in public, of course. #}
+          <span><a href="#" data-edit-group data-title>Spiffy People</a></span>
         </td>
         <td><span data-tags></span></td>
       </tr>
     </table>
+    {# Container for pager, which gets rendered here by js #}
+    <div data-pager-box></div>
   </div>
 
   <div class="apos-modal-footer">

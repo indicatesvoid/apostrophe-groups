@@ -1,32 +1,30 @@
 {
-  "name": "apostrophe-people",
+  "name": "apostrophe-groups",
   "version": "0.0.1",
-  "description": "Staff directories, user accounts and personal profiles for the Apostrophe content management system",
+  "description": "Groups for apostrophe-people, a component of the Apostrophe content management system",
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "repository": {
     "type": "git",
-    "url": "git@github.com:punkave/apostrophe-people.git"
+    "url": "git@github.com:punkave/apostrophe-groups.git"
   },
   "keywords": [
     "blog",
     "apostrophe",
     "cms",
     "people",
+    "groups",
     "users",
-    "login",
     "punkave"
   ],
   "author": "P'unk Avenue LLC",
   "license": "MIT",
   "dependencies": {
-    "async": "~0.2.x",
+    "async": "~0.2.8",
     "underscore": "~1.4.x",
     "extend": "~1.1.x",
-    "apostrophe-snippets": "0.0.x",
-    "moment": "~2.0.x",
-    "password-hash": "~1.2.1"
+    "apostrophe-snippets": "~0.0.x"
   }
 }

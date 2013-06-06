@@ -1,8 +1,8 @@
 {% extends "layout.html" %}
 
-{% include "peopleMacros.html" %}
+{% include "groupMacros.html" %}
 
-{% block bodyClass %}{{ super() }} apos-people-page{% endblock %}
+{% block bodyClass %}{{ super() }} apos-group-page{% endblock %}
 
 {% block extraBreadcrumbs %}
   <li><a href="{{ page.url }}">{{ page.title | e }}</a></li>
@@ -15,7 +15,7 @@
   </div>
 
   <div class="column-2 blog-people">
-    {{ renderPeople(item, page.url) }}
+    {{ renderGroup(item, page.url, { full: true }) }}
   </div>
 
 {% endblock %}

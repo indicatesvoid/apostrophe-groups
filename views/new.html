@@ -1,30 +1,27 @@
 {% include 'snippetMacros.html' %}
-<div class="apos-modal apos-template {% block class %}apos-new-blog-post{% endblock %}">
-  <h3>{% block label %}New Article{% endblock %}</h3>
+<div class="apos-modal apos-template {% block class %}apos-new-group{% endblock %}">
+  <h3>{% block label %}New Group{% endblock %}</h3>
   {% block topButtons %}
   {% endblock %}
   <div class="apos-modal-body">
     <form>
-      {{ snippetText('first_name', 'First Name') }}
-      {{ snippetText('last_name', 'Last Name') }}
-      {{ snippetText('name', 'Name') }}
+      {# title is universal across all snippets and should be the group's name #}
+      {{ snippetText('title', 'Name') }}
 
-      <div class="apos-login-group">
-        {{ snippetBoolean('login', 'Can Log In') }}
-        {{ snippetText('username', 'Username') }}
-        {{ snippetPassword('password', 'Password') }}
-      </div>
+      {# TODO customize this as radio buttons, there will be a small #}
+      {# number of choices available, for now a comma-separated list #}
+      {{ snippetText('permissions', 'Permissions') }}
+
+      {{ snippetSelective('people', 'People') }}
 
       {# Slugs become editable later, allow the edit template to add them here #}
       {% block slug %}{% endblock %}
       {{ snippetText('tags', 'Tags (comma-separated)') }}
-      {{ snippetEmail('email', 'Email') }}
-      {{ snippetEmail('phone', 'Phone') }}
 
-      {{ snippetBoolean('published', 'Profile Published') }}
+      {{ snippetBoolean('published', 'Published') }}
       {# The real work for these is in main.js, just get placeholders into the form #}
       {{ snippetSingleton('thumbnail', 'Thumbnail') }}
-      {{ snippetArea('body', 'Bio') }}
+      {{ snippetArea('body', 'About') }}
     </form>
   </div>
   {% block buttons %}

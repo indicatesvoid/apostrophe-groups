@@ -2,9 +2,9 @@
 
 {% include "snippetMacros.html" %}
 
-{% block class %}apos-edit-person{% endblock %}
+{% block class %}apos-edit-group{% endblock %}
 
-{% block label %}Edit Person{% endblock %}
+{% block label %}Edit Group{% endblock %}
 
 {% block slug %}
   {{ snippetText('slug', 'Slug') }}
@@ -16,4 +16,8 @@
 
 {% block buttons %}
 {{ snippetEditButtons() }}
+{% endblock %}
+
+{% block afterPassword %}
+<p>Leave blank for no change</p>
 {% endblock %}
