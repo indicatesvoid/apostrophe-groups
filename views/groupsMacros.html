@@ -34,8 +34,13 @@
       </div>
       {% if (item._people) %}
         <ul class="apos-group-people">
-          {% for person in item.people %}
-            <li class="apos-group-person">{% if person.url %}<a href="{{ person.url | e }}">person.title | e</a>{% endif %}</li>
+          {% for person in item._people %}
+            {{ aposLog()}}
+            <li class="apos-group-person">
+              {% if person.url %}<a href="{{ person.url | e }}"></a>{% endif %}
+              {{ person.title | e }}
+              {% if person.url %}</a>{% endif %}
+            </li>
           {% endfor %}
         </ul>
       {% endif %}
