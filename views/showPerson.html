@@ -6,7 +6,8 @@
 
 {% block extraBreadcrumbs %}
   <li><a href="{{ page.url }}">{{ page.title | e }}</a></li>
-  <li>&nbsp;/&nbsp;{{ item.title | e }}</li>
+  <li>&nbsp;/&nbsp;<a href="{{ page.url }}/{{ item.slug }}">{{ item.title | e }}</a></li>
+  <li>&nbsp;/&nbsp;{{ person.title | e }}</li>
 {% endblock %}
 
 {% block mainContent %}
@@ -14,8 +15,8 @@
     {{ aposArea({ slug: slug + ":sidebar", area: page.areas.sidebar, edit: edit }) }}
   </div>
 
-  <div class="column-2 blog-people">
-    {{ renderGroup(item, page.url, { full: true }) }}
+  <div class="column-2 apos-person">
+    {{ renderPerson(person, page.url, { full: true }) }}
   </div>
 
 {% endblock %}

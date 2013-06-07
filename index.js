@@ -32,8 +32,8 @@ groups.Groups = function(optionsArg, callback) {
   var options = {
     instance: 'group',
     name: 'groups',
-    label: 'Groups',
-    icon: 'groups',
+    label: 'Directory',
+    icon: 'directory',
     menuName: 'aposGroupsMenu',
     browser: {
       // Options to be passed to the browser side constructor
@@ -131,6 +131,52 @@ groups.Groups = function(optionsArg, callback) {
         });
       }
     });
+  };
+
+  // If this request looks like a request for a 'show' page (a permalink),
+  // this method returns the expected snippet slug. Otherwise it returns
+  // false. Override this to match URLs with extra vanity components like
+  // the publication date in an article URL.
+  self.isShow = function(req) {
+    if (req.remainder.length) {
+      var afterSlash = req.remainder.substr(1);
+      // Could be just a group, could be group/person
+      var parts = afterSlash.split(/\//);
+      if (parts.length === 2) {
+        // Note there's a person in there and return the
+        // group slug
+        req.personSlug = parts[1];
+        return parts[0];
+      } else {
+        return afterSlash;
+      }
+    }
+    return false;
+  };
+
+  // Override self.show to subdivide into group pages and
+  // person-considered-as-member-of-group pages
+  self.show = function(req, snippet, callback) {
+    req.extras.item = snippet;
+    req.extras.item.url = self.permalink(req.extras.item, req.bestPage);
+    if (req.personSlug) {
+      // We want a specific person. We have a summary of them, but get
+      // the real thing, with other group affiliations.
+      return self._people.get(req, { slug: req.personSlug }, function(err, results) {
+        if (err) {
+          return callback(err);
+        }
+        req.extras.person = results.snippets[0];
+        if (!req.extras.person) {
+          req.notfound = true;
+          return callback(null);
+        }
+        req.template = self.renderer('showPerson');
+        return callback(null);
+      });
+    }
+    req.template = self.renderer('show');
+    return callback(null);
   };
 
   if (callback) {
