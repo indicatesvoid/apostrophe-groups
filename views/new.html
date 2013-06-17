@@ -8,9 +8,13 @@
       {# title is universal across all snippets and should be the group's name #}
       {{ snippetText('title', 'Name') }}
 
-      {# TODO customize this as radio buttons, there will be a small #}
-      {# number of choices available, for now a comma-separated list #}
-      {{ snippetText('permissions', 'Permissions') }}
+      {# TODO it would be nice to have hints to indicate when permissions are mutually #}
+      {# exclusive so that the interface could be a select element but let's start with #}
+      {# something that works in the more general case too #}
+
+      {% for permission in type.permissions %}
+        {{ formBoolean(permission.value, permission.label) }}
+      {% endfor %}
 
       {{ snippetSelective('people', 'People') }}
 
