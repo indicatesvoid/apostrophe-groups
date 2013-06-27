@@ -1,7 +1,7 @@
-# apostrophe-people
+# apostrophe-groups
 
-`apostrophe-people` adds staff directories, user accounts and user profiles to the [Apostrophe](http://github.com/punkave/apostrophe) content management system. `apostrophe-people` provides both backend and frontend components, including a friendly UI built on Apostrophe's rich content editing features.
+The `apostrophe-groups` module, together with [apostrophe-people](http://github.com/punkave/apostrophe-people), adds a directory of people and "groups" (such as departments) to sites powered by the [Apostrophe](http://github.com/punkave/apostrophe-sandbox) content management system.
 
-A "person" is anyone who can either log in, be seen in a personnel directory, or both. "Users" are simply people who have the "login" box checked and a username and password configured. This follows the MongoDB philosophy of avoiding gratuitous joins between users, profiles, etc.
+You must have both the people module and the groups module.
 
-People can be centrally managed via the "People" dropdown. In addition, one can create a "people page" to display a directory of people. For now people are displayed on such pages based on shared tags, however we plan to also give each user an affinity for a specific "home" page allowing for easier management of users.
+[See the `apostrophe-people` module](http://github.com/punkave/apostrophe-people) for complete documentation.
