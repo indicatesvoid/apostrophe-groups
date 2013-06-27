@@ -191,7 +191,7 @@ groups.Groups = function(optionsArg, callback) {
     if (req.personSlug) {
       // We want a specific person. We have a summary of them, but get
       // the real thing, with other group affiliations.
-      return self._people.get(req, { slug: req.personSlug }, function(err, results) {
+      return self._people.get(req, { slug: req.personSlug }, {}, function(err, results) {
         if (err) {
           return callback(err);
         }
