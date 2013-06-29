@@ -2,21 +2,21 @@
 
 {% include "directoryMacros.html" %}
 
-{% block bodyClass %}{{ super() }} apos-group-page{% endblock %}
+{# If you wish you may access the group variable which is the group appearing #}
+{# in the URL at this point. You may also access all groups the user is a member of #}
+{# via person._groups, and the renderPerson macro does that #}
+
+{% block bodyClass %}{{ super() }} apos-directory-person-page{% endblock %}
 
 {% block extraBreadcrumbs %}
   <li><a href="{{ page.url }}">{{ page.title | e }}</a></li>
-  <li>&nbsp;/&nbsp;<a href="{{ page.url }}/{{ item.slug }}">{{ item.title | e }}</a></li>
+  {# Group will only be present if we're using the groups style for the directory page #}
+  {% if group %}
+    <li>&nbsp;/&nbsp;<a href="{{ group.url }}">{{ group.title | e }}</a></li>
+  {% endif %}
   <li>&nbsp;/&nbsp;{{ person.title | e }}</li>
 {% endblock %}
 
 {% block mainContent %}
-  <div class="column apos-area-sidebar">
-    {{ aposArea({ slug: slug + ":sidebar", area: page.areas.sidebar, edit: edit }) }}
-  </div>
-
-  <div class="column-2 apos-person">
-    {{ renderPerson(person, page.url, { full: true }) }}
-  </div>
-
+  {{ renderPerson(person, { full: true }) }}
 {% endblock %}

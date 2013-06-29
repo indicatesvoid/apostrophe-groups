@@ -11,6 +11,25 @@ function AposGroups(optionsArg) {
     self._peopleAction = options.peopleAction;
   }
 
+  // PAGE SETTINGS FOR THIS TYPE
+
+  self.settings = {
+    serialize: function($el, $details) {
+      var data = {
+        groupIds: $details.find('[data-name="typeSettings[groupIds]"]').selective('get'),
+        defaultView: $details.findByName('typeSettings[defaultView]').val()
+      };
+      return data;
+    },
+    unserialize: function(data, $el, $details) {
+      $details.find('[data-name="typeSettings[groupIds]"]').selective({
+        source: self._action + '/autocomplete',
+        data: data.groupIds || []
+      });
+      $details.findByName('typeSettings[defaultView]').val(data.defaultView);
+    }
+  };
+
   self.beforeSave = function($el, data, callback) {
     data._personIds = $el.find('[data-name="people"]').selective('get');
     _.each(options.permissions, function(permission) {

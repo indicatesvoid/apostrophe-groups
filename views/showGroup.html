@@ -1,0 +1,14 @@
+{% extends "layout.html" %}
+
+{% include "directoryMacros.html" %}
+
+{% block bodyClass %}{{ super() }} apos-directory-group-page{% endblock %}
+
+{% block extraBreadcrumbs %}
+  <li><a href="{{ page.url }}">{{ page.title | e }}</a></li>
+  <li>&nbsp;/&nbsp;{{ group.title | e }}</li>
+{% endblock %}
+
+{% block mainContent %}
+  {{ renderGroup(group, { full: true }) }}
+{% endblock %}

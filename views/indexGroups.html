@@ -1,0 +1,23 @@
+{% extends "layout.html" %}
+
+{% include "directoryMacros.html" %}
+
+{% block bodyClass %}{{ super() }} apos-directory-page apos-directory-groups-page{% endblock %}
+
+{# Output the current content of the page, with buttons to edit it #}
+
+{% block mainContent %}
+
+  {# Feel free to hide this with CSS if you only want the default #}
+  {# type of index to be offered. You can also subclass and override #}
+  {# the groupsLabel or peopleLabel block #}
+  <div class="snippets-filter clearfix">
+    <h2 class="groups active">{% block groupsLabel %}Groups{% endblock %}</h2>
+    <h2 class="people"><a href="{{ page.url }}/people">{% block peopleLabel %}People{% endblock %}</a></h2>
+  </div>
+
+  <div class="apos-groups">
+    {{ renderGroups(groups) }}
+  </div>
+
+{% endblock %}

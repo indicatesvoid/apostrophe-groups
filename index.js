@@ -152,7 +152,8 @@ groups.Groups = function(optionsArg, callback) {
         if (!getPeople) {
           return callback(null);
         }
-        return self._apos.joinOneToManyReverse(req, snippets, 'groupIds', '_people', { get: self._people.get, getOptions: { getGroups: false } }, function(err) {
+        // We want to permalink to the same directory page, if any
+        return self._apos.joinOneToManyReverse(req, snippets, 'groupIds', '_people', { get: self._people.get, getOptions: { getGroups: false, permalink: options.permalink } }, function(err) {
           if (err) {
             return callback(err);
           }
@@ -162,50 +163,164 @@ groups.Groups = function(optionsArg, callback) {
     });
   };
 
-  // If this request looks like a request for a 'show' page (a permalink),
-  // this method returns the expected snippet slug. Otherwise it returns
-  // false. Override this to match URLs with extra vanity components like
-  // the publication date in an article URL.
-  self.isShow = function(req) {
-    if (req.remainder.length) {
-      var afterSlash = req.remainder.substr(1);
-      // Could be just a group, could be group/person
-      var parts = afterSlash.split(/\//);
-      if (parts.length === 2) {
-        // Note there's a person in there and return the
-        // group slug
-        req.personSlug = parts[1];
-        return parts[0];
-      } else {
-        return afterSlash;
+  // Allow a directory page to be locked down by group
+  var superAddCriteria = self.addCriteria;
+  self.addCriteria = function(req, criteria, options) {
+    superAddCriteria.call(self, req, criteria, options);
+    if (req.page.typeSettings) {
+      if (req.page.groupIds && req.page.groupIds.length) {
+        criteria = {
+          $and: [ { _id: { $in: req.page.groupIds } }, criteria ]
+        };
       }
     }
-    return false;
   };
 
-  // Override self.show to subdivide into group pages and
-  // person-considered-as-member-of-group pages
-  self.show = function(req, snippet, callback) {
-    req.extras.item = snippet;
-    req.extras.item.url = self.permalink(req.extras.item, req.bestPage);
-    if (req.personSlug) {
-      // We want a specific person. We have a summary of them, but get
-      // the real thing, with other group affiliations.
-      return self._people.get(req, { slug: req.personSlug }, function(err, results) {
-        if (err) {
-          return callback(err);
-        }
-        req.extras.person = results.snippets[0];
-        if (!req.extras.person) {
-          req.notfound = true;
-          return callback(null);
-        }
-        req.template = self.renderer('showPerson');
-        return callback(null);
-      });
+  // Adjust the best page matching algorithm to look at the groupIds property
+  // rather than tags, and tell it that we're comparing against the id of the
+  // snippet rather than an array property on the snippet
+
+  self.bestPageMatchingProperty = 'groupIds';
+  self.bestPageById = true;
+
+  self.permalink = function(req, snippet, page, callback) {
+      snippet.url = page.slug + '/groups/' + snippet.slug;
+      return callback(null);
+  };
+
+  // The page settings for a directory page are different from other
+  // collection pages. There's no tag picker, just a group picker and a default view picker
+
+  self.settings.sanitize = function(data, callback) {
+    var ok = {};
+    // Selecting nonexistent groups isn't dangerous, it's just silly.
+    // So just make sure we have an array of strings
+    ok.groupIds = self._apos.sanitizeTags(data.groupIds);
+    ok.defaultView = (data.defaultView === 'people') ? 'people' : 'groups';
+    return callback(null, ok);
+  };
+
+  // Returns either 'people' or 'groups', as determined by the style picker
+  // in page settings.
+
+  self.getDefaultView = function(req) {
+    var settings = req.bestPage.typeSettings;
+      if (settings && settings.groupIds.length === 1) {
+        // If the page is locked down to only one group it doesn't
+        // make sense to show an index of groups. We should already
+        // know what group it is from context. TODO: it would be
+        // nice if you could see this was going to happen when you
+        // picked just one group in page settings.
+        return 'people';
+      }
+    if (req.bestPage.typeSettings && req.bestPage.typeSettings.defaultView) {
+      return req.bestPage.typeSettings.defaultView;
     }
-    req.template = self.renderer('show');
-    return callback(null);
+    return 'groups';
+  };
+
+  // Override the dispatcher. The default one isn't much use for our
+  // needs because we are displaying both groups and people and we don't
+  // want conventional pagination (although we may need to implement
+  // A-Z pagination and possibly conventional pagination within that)
+
+  self.dispatch = function(req, callback) {
+
+    if (!req.remainder.length) {
+      // The default behavior depends on the default view selector
+      // in page settings. Redirect to the appropriate view
+      if (self.getDefaultView(req) === 'people') {
+        req.redirect = req.url + '/people';
+        return callback(null);
+      } else {
+        req.redirect = req.url + '/groups';
+        return callback(null);
+      }
+    }
+
+    if (req.remainder.match(/^\/people$/)) {
+      return self.indexPeople(req, callback);
+    }
+
+    var matches = req.remainder.match(/^\/people\/(.+)$/);
+    if (matches) {
+      return self.showPerson(req, matches[1], callback);
+    }
+
+    if (req.remainder.match(/^\/groups$/)) {
+      return self.indexGroups(req, callback);
+    }
+
+    matches = req.remainder.match(/^\/groups\/(.+)$/);
+    if (matches) {
+      return self.showGroup(req, matches[1], callback);
+    }
+  };
+
+  self.showPerson = function(req, slug, callback) {
+    return self._people.getOne(req, { slug: slug }, { permalink: req.bestPage }, function(err, person) {
+      if (err) {
+        return callback(err);
+      }
+      req.extras.person = person;
+      if (!req.extras.person) {
+        req.notfound = true;
+        return callback(null);
+      }
+      req.template = self.renderer('showPerson');
+      return callback(null);
+    });
+  };
+
+  self.indexPeople = function(req, callback) {
+    var criteria = {};
+    var settings = req.bestPage.typeSettings;
+    if (settings && settings.groupIds && settings.groupIds.length) {
+      criteria.groupIds = { $in: settings.groupIds };
+      if (settings.groupIds.length === 1) {
+        req.extras.oneGroup = true;
+      }
+    }
+    return self._people.get(req, criteria, { permalink: req.bestPage }, function(err, results) {
+      if (err) {
+        return callback(err);
+      }
+      req.extras.people = results.snippets;
+      req.template = self.renderer('indexPeople');
+      return callback(null);
+    });
+  };
+
+  self.indexGroups = function(req, callback) {
+    // List of groups. The template can see groups
+    var criteria = {};
+    var settings = req.bestPage.typeSettings;
+    if (settings && settings.groupIds && settings.groupIds.length) {
+      criteria._id = { $in: settings.groupIds };
+    }
+    return self.get(req, criteria, { permalink: req.bestPage }, function(err, results) {
+      if (err) {
+        return callback(err);
+      }
+      req.extras.groups = results.snippets;
+      req.template = self.renderer('indexGroups');
+      return callback(null);
+    });
+  };
+
+  self.showGroup = function(req, slug, callback) {
+    // A specific group
+    return self.getOne(req, { slug: slug }, { permalink: req.bestPage }, function(err, group) {
+      if (err) {
+        return callback(err);
+      }
+      req.extras.group = group;
+      if (!req.extras.group) {
+        req.notfound = true;
+      }
+      req.template = self.renderer('showGroup');
+      return callback(null);
+    });
   };
 
   self._apos.tasks['generate-users-and-groups'] = function(callback) {

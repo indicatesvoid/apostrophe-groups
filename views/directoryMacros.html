@@ -1,91 +1,79 @@
-{% include 'pagerMacros.html' %}
+{# To render full bio: renderPeople(people, { full: true } ) #}
+{# To render compact: renderPeople(people) #}
 
-{# To render full descriptions: renderGroups(items, slug, { full: true } ) #}
-{# To render compact links to groups: renderGroups(items, slug) #}
+{% macro renderPeople(people, options = {}) %}
+  {% for person in people %}
+    {{ renderPerson(person, options) }}
+  {% endfor %}
+{% endmacro %}
 
-{% macro renderGroups(items, pageUrl, options = {}) %}
+{# To render full bio: renderPerson(person, { full: true } ) #}
+{# To render compact: renderPerson(person) #}
+
+{% macro renderPerson(person, options = {}) %}
+  <div class="apos-person">
+    <div class="apos-thumbnail">
+      {{ aposSingleton({ slug: person.slug + ':thumbnail', type: 'slideshow', area: person.areas.thumbnail, edit: false, size: 'one-sixth' }) }}
+    </div>
+    <div class="apos-person-heading">
+      <h4>
+        <a href="{{ person.url }}">
+          {{ person.title | e }}
+        </a>
+      </h4>
+    </div>
+    {% if options.full %}
+      <div class="apos-person-body">{{ aposArea({ area: person.areas.body }) }}</div>
+      {% if person._groups %}
+        <div class="apos-person-groups">
+          Affiliated with:
+          {% for group in person._groups %}
+            <a href="{{ group.url }}">{{ group.title | e }}</a>
+          {% endfor %}
+        </div>
+      {% endif %}
+    {% endif %}
+  </div>
+{% endmacro %}
+
+{# To render full descriptions: renderGroups(items, { full: true } ) #}
+{# To render compact links to groups: renderGroups(items) #}
+
+{% macro renderGroups(items, options = {}) %}
   {% if items %}
     {% for item in items %}
-      {{ renderGroup(item, pageUrl, options) }}
+      {{ renderGroup(item, options) }}
     {% endfor %}
   {% else %}
     <h4>There are no suitable groups at the moment.</h4>
   {% endif %}
 {% endmacro %}
 
-{% macro renderGroup(item, pageUrl, options = {}) %}
+{# To render full description: renderGroup(group, { full: true } ) #}
+
+{# To render compact: renderGroup(group) #}
+
+{# To render full descriptions of the people as well: #}
+{# renderGroup(group, { full: true, { person: { full: true } } }) #}
+
+{# That last only works if you actually have the people joined to the group, which generally #}
+{# won't be true unless you retrieved only one group. #}
+
+{% macro renderGroup(group, options = {}) %}
   <div class="apos-group">
     <div class="apos-thumbnail">
-      {{ aposSingleton({ slug: item.slug + ':thumbnail', type: 'slideshow', area: item.areas.thumbnail, edit: false, size: 'one-sixth' }) }}
+      {{ aposSingleton({ slug: group.slug + ':thumbnail', type: 'slideshow', area: group.areas.thumbnail, edit: false, size: 'one-sixth' }) }}
     </div>
     <div class="apos-group-heading">
-      <h4><a href="{{ pageUrl }}/{{ item.slug }}">{{ item.title | e }}</a></h4>
+      <h4><a href="{{ group.url }}">{{ group.title | e }}</a></h4>
     </div>
     {% if options.full %}
-      <div class="apos-group-body">{{ aposArea({ area: item.areas.body }) }}</div>
-        {% if item.tags %}
-          <div class="apos-group-tags">
-            See also:
-            {% for tag in item.tags %}
-              <a href="{{ pageUrl | build({ tag: tag }) }}">{{ tag | e }}</a>
-            {% endfor %}
-          </div>
-        {% endif %}
-      </div>
-      {% if (item._people) %}
-        <ul class="apos-group-people">
-          {% for person in item._people %}
-            <li class="apos-group-person">
-              <a href="{{ pageUrl }}/{{ item.slug }}/{{ person.slug }}">
-                {{ person.title | e }}
-              </a>
-            </li>
-          {% endfor %}
-        </ul>
+      <div class="apos-group-body">{{ aposArea({ area: group.areas.body }) }}</div>
+      {% if (group._people) %}
+        <div class="apos-people">
+          {{ renderPeople(group._people, options.person) }}
+        </div>
       {% endif %}
-    {% endif %}
-  </div>
-{% endmacro %}
-
-{# To render full bio: renderPerson(item, page.url, { full: true } ) #}
-{# To render compact: renderPerson(item, page.url) #}
-
-{% macro renderPerson(item, pageUrl, options = {}) %}
-  <div class="apos-person">
-    <div class="apos-thumbnail">
-      {{ aposSingleton({ slug: item.slug + ':thumbnail', type: 'slideshow', area: item.areas.thumbnail, edit: false, size: 'one-sixth' }) }}
-    </div>
-    <div class="apos-person-heading">
-      <h4>
-        {% if item._groups %}
-          <a href="{{ pageUrl }}/{{ item._groups[0].slug }}/{{ item.slug }}">
-        {% endif %}
-        {{ item.title | e }}
-        {% if item._groups %}
-          </a>
-        {% endif %}
-      </h4>
-    </div>
-    {% if options.full %}
-      <div class="apos-person-body">{{ aposArea({ area: item.areas.body }) }}</div>
-        {# People can have both group memberships and tags #}
-        {% if item._groups %}
-          <div class="apos-person-groups">
-            Affiliated with:
-            {% for group in item._groups %}
-              <a href="{{ group.url }}">{{ group.title | e }}</a>
-            {% endfor %}
-          </div>
-        {% endif %}
-        {% if item.tags %}
-          <div class="apos-person-tags">
-            See also:
-            {% for tag in item.tags %}
-              <a href="{{ pageUrl | build({ tag: tag }) }}">{{ tag | e }}</a>
-            {% endfor %}
-          </div>
-        {% endif %}
-      </div>
     {% endif %}
   </div>
 {% endmacro %}
