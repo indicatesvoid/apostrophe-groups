@@ -70,6 +70,7 @@
     {% if options.full %}
       <div class="apos-group-body">{{ aposArea({ area: group.areas.body }) }}</div>
       {% if (group._people) %}
+        <h4>Team Members</h4>
         <div class="apos-people">
           {{ renderPeople(group._people, options.person) }}
         </div>

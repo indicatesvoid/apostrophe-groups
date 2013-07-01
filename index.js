@@ -184,7 +184,7 @@ groups.Groups = function(optionsArg, callback) {
   self.bestPageById = true;
 
   self.permalink = function(req, snippet, page, callback) {
-      snippet.url = page.slug + '/groups/' + snippet.slug;
+      snippet.url = page.slug + '/' + snippet.slug;
       return callback(null);
   };
 
@@ -226,35 +226,68 @@ groups.Groups = function(optionsArg, callback) {
 
   self.dispatch = function(req, callback) {
 
+    var defaultView = self.getDefaultView(req);
+
     if (!req.remainder.length) {
       // The default behavior depends on the default view selector
-      // in page settings. Redirect to the appropriate view
-      if (self.getDefaultView(req) === 'people') {
-        req.redirect = req.url + '/people';
-        return callback(null);
+      // in page settings.
+      if (defaultView === 'people') {
+        return self.indexPeople(req, callback);
       } else {
-        req.redirect = req.url + '/groups';
-        return callback(null);
+        return self.indexGroups(req, callback);
       }
     }
 
+    // If the URL is /people show the people index; however, if the
+    // default view is people, redirect to shorten the URL
     if (req.remainder.match(/^\/people$/)) {
+      if (defaultView === 'people') {
+        req.redirect = req.url.replace(/\/people$/, '');
+        return callback(null);
+      }
       return self.indexPeople(req, callback);
     }
 
-    var matches = req.remainder.match(/^\/people\/(.+)$/);
-    if (matches) {
-      return self.showPerson(req, matches[1], callback);
-    }
-
+    // If the URL is /groups show the groups index; however, if the
+    // default view is groups, redirect to shorten the URL
     if (req.remainder.match(/^\/groups$/)) {
+      if (defaultView === 'groups') {
+        req.redirect = req.url.replace(/\/groups$/, '');
+        return callback(null);
+      }
       return self.indexGroups(req, callback);
     }
 
-    matches = req.remainder.match(/^\/groups\/(.+)$/);
-    if (matches) {
-      return self.showGroup(req, matches[1], callback);
-    }
+    // The URL is either a person or a group. But which one?
+    // Good question, so let's use a fast Mongo query to find out,
+    // then call the appropriate 'show' method which will
+    // fetch it properly with permissions and custom features of
+    // that type of snippet taken into account
+
+    // Skip the slash. The rest is a slug
+    var slug = req.remainder.substr(1);
+    var type;
+    return self._apos.pages.findOne({ slug: slug }, { type: 1, _id: 1 }, function(err, snippet) {
+      if (err) {
+        return callback(err);
+      }
+      if (!snippet) {
+        req.notfound = true;
+        return callback(null);
+      }
+      type = snippet.type;
+      if (type === 'person') {
+        return self.showPerson(req, slug, callback);
+      }
+
+      if (type === 'group') {
+        return self.showGroup(req, slug, callback);
+      }
+
+      // Some other type of snippet, not relevant here
+      req.notfound = true;
+      return callback(null);
+    });
   };
 
   self.showPerson = function(req, slug, callback) {
