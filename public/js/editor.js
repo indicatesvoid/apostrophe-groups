@@ -26,7 +26,7 @@ function AposGroups(optionsArg) {
         source: self._action + '/autocomplete',
         data: data.groupIds || []
       });
-      $details.findByName('typeSettings[defaultView]').val(data.defaultView);
+      $details.findByName('typeSettings[defaultView]').val(data.defaultView || 'groups');
     }
   };
 
