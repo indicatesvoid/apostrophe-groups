@@ -314,7 +314,13 @@ groups.Groups = function(optionsArg, callback) {
         req.extras.oneGroup = true;
       }
     }
-    return self._people.get(req, criteria, { permalink: req.bestPage }, function(err, results) {
+    var options = {};
+    if (req.query.letter) {
+      options.letter = req.query.letter;
+      req.extras.letter = req.query.letter;
+    }
+    options.permalink = req.bestPage;
+    return self._people.get(req, criteria, options, function(err, results) {
       if (err) {
         return callback(err);
       }
