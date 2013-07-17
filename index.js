@@ -276,6 +276,7 @@ groups.Groups = function(optionsArg, callback) {
         return callback(null);
       }
       type = snippet.type;
+
       if (type === 'person') {
         return self.showPerson(req, slug, callback);
       }
@@ -319,11 +320,16 @@ groups.Groups = function(optionsArg, callback) {
       options.letter = req.query.letter;
       req.extras.letter = req.query.letter;
     }
+
+    // pager?
+    self.addPager(req, options);
+
     options.permalink = req.bestPage;
     return self._people.get(req, criteria, options, function(err, results) {
       if (err) {
         return callback(err);
       }
+      self.setPagerTotal(req, results.total);
       req.extras.people = results.snippets;
       req.template = self.renderer('indexPeople');
       return callback(null);
