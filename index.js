@@ -132,11 +132,6 @@ groups.Groups = function(optionsArg, callback) {
       getPeople = false;
     }
 
-    // Add the associated people to the returned objects (manual join). Use a
-    // leading underscore to denote that this property is temporary and should
-    // not be saved. Do this only if there is just one group being returned, for now
-    // (TODO: write a version of apos.joinOneToMany that works when the relationship
-    // is stores on the "one" side and use that to support broadening this).
     return superGet.call(self, req, criteria, options, function(err, results) {
       if (err) {
         return callback(err);
@@ -153,7 +148,7 @@ groups.Groups = function(optionsArg, callback) {
           return callback(null);
         }
         // We want to permalink to the same directory page, if any
-        return self._apos.joinOneToManyReverse(req, snippets, 'groupIds', '_people', { get: self._people.get, getOptions: { getGroups: false, permalink: options.permalink } }, function(err) {
+        return self._apos.joinByArrayReverse(req, snippets, 'groupIds', '_people', { get: self._people.get, getOptions: { getGroups: false, permalink: options.permalink } }, function(err) {
           if (err) {
             return callback(err);
           }
