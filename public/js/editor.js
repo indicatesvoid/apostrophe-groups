@@ -46,10 +46,11 @@ function AposGroups(optionsArg) {
       extras: true,
       source: self._peopleAction + '/autocomplete',
       data: _.map(snippet._people || [], function(person) {
-        // Include their job title for this group. We have to be extraordinarily
-        // patient as this may not exist yet in the data
-        var jobTitle = (person.groupExtras && person.groupExtras[snippet._id] && person.groupExtras[snippet._id].jobTitle) ? person.groupExtras[snippet._id].jobTitle : '';
-        return { label: person.title, value: person._id, jobTitle: jobTitle };
+        var data = { label: person.title, value: person._id };
+        if (person.groupExtras && person.groupExtras[snippet._id]) {
+          $.extend(true, data, person.groupExtras[snippet._id]);
+        }
+        return data;
       })
     });
     _.each(options.permissions, function(permission) {
