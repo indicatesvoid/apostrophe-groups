@@ -16,7 +16,15 @@
         {{ formBoolean(permission.value, permission.label) }}
       {% endfor %}
 
-      {{ snippetSelective('people', 'People') }}
+      {{ snippetSelective('people', 'People', {
+        placeholder: 'Type Name Here',
+        extras: {
+          'jobTitle': {
+            label: 'Job Title',
+            type: 'text'
+          }
+        }
+      }) }}
 
       {# Slugs become editable later, allow the edit template to add them here #}
       {% block slug %}{% endblock %}

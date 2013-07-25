@@ -21,15 +21,28 @@
           {{ person.title | e }}
         </a>
       </h4>
+      {# Show job title for a specific group prominently if any #}
+      {% if options.showTitleForGroup %}
+        {% if person.groupExtras[options.showTitleForGroup._id].jobTitle %}
+          <h5>{{ person.groupExtras[options.showTitleForGroup._id].jobTitle | e }}</h5>
+        {% endif %}
+      {% endif %}
     </div>
     {% if options.full %}
       <div class="apos-person-body">{{ aposArea({ area: person.areas.body }) }}</div>
       {% if person._groups %}
         <div class="apos-person-groups">
           Affiliated with:
-          {% for group in person._groups %}
-            <a href="{{ group.url }}">{{ group.title | e }}</a>
-          {% endfor %}
+          <ul>
+            {% for group in person._groups %}
+              <li>
+                {% if person.groupExtras[group._id].jobTitle %}
+                  {{ person.groupExtras[group._id].jobTitle | e }},
+                {% endif %}
+                <a href="{{ group.url }}">{{ group.title | e }}</a>
+              </li>
+            {% endfor %}
+          </ul>
         </div>
       {% endif %}
     {% endif %}

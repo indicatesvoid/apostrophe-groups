@@ -33,7 +33,7 @@ function AposGroups(optionsArg) {
   };
 
   self.beforeSave = function($el, data, callback) {
-    data._personIds = $el.find('[data-name="people"]').selective('get');
+    data._peopleInfo = $el.find('[data-name="people"]').selective('get');
     _.each(options.permissions, function(permission) {
       data[permission.value] = $el.findByName(permission.value).val();
     });
@@ -43,9 +43,13 @@ function AposGroups(optionsArg) {
   self.afterPopulatingEditor = function($el, snippet, callback) {
     $el.findByName('permissions').val(apos.tagsToString(snippet.permissions));
     $el.find('[data-name="people"]').selective({
+      extras: true,
       source: self._peopleAction + '/autocomplete',
       data: _.map(snippet._people || [], function(person) {
-        return { label: person.title, value: person._id };
+        // Include their job title for this group. We have to be extraordinarily
+        // patient as this may not exist yet in the data
+        var jobTitle = (person.groupExtras && person.groupExtras[snippet._id] && person.groupExtras[snippet._id].jobTitle) ? person.groupExtras[snippet._id].jobTitle : '';
+        return { label: person.title, value: person._id, jobTitle: jobTitle };
       })
     });
     _.each(options.permissions, function(permission) {

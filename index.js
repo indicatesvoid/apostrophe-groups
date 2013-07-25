@@ -107,20 +107,46 @@ groups.Groups = function(optionsArg, callback) {
   };
 
   self.afterSave = function(req, data, snippet, callback) {
-    // The person-group relationship is actually stored in the
-    // person objects. Blast them with $addToSet and $in, and
+    // The person-group relationship is actually stored in arrays in
+    // the person objects. Arrays of IDs are a good choice because
+    // they can be indexed. Blast them with $addToSet and $in, and
     // conversely, $pull and $nin.
-    var personIds = _.map(data._personIds, function(personId) {
-      return self._apos.sanitizeString(personId);
-    });
-    async.series([add, remove], callback);
 
-    function add(callback) {
+    var personIds = _.map(data._peopleInfo, function(personInfo) {
+      return self._apos.sanitizeString(personInfo.value);
+    });
+    async.series([addId, addExtras, removeId, removeExtras], callback);
+
+    function addId(callback) {
       return self._apos.pages.update({ _id: { $in: personIds } }, { $addToSet: { groupIds: snippet._id } }, { multi: true }, callback);
     }
 
-    function remove(callback) {
-      return self._apos.pages.update({ _id: { $nin: personIds } }, { $pull: { groupIds: snippet._id } }, { multi: true }, callback);
+    function removeId(callback) {
+      return self._apos.pages.update({ type: self._instance, _id: { $nin: personIds } }, { $pull: { groupIds: snippet._id } }, { multi: true }, callback);
+    }
+
+    // Extras like job titles are stored in an object property
+    // for each person:
+    //
+    // { title: 'Bob Smith', groupExtras: { someGroupId: { jobTitle: 'Flosser' } } }
+
+    function addExtras(callback) {
+      async.eachSeries(data._peopleInfo, function(personInfo, callback) {
+        var set = { $set: { } };
+        var extras = { };
+        // Clone the object so we can modify it
+        extend(true, extras, personInfo);
+        // Do not redundantly store the ID
+        delete extras.value;
+        set.$set['groupExtras.' + snippet._id] = extras;
+        return self._apos.pages.update({ _id: personInfo.value }, set, callback);
+      }, callback);
+    }
+
+    function removeExtras(callback) {
+      var unset = { $unset: { } };
+      unset.$unset['groupExtras.' + snippet._id] = 1;
+      return self._apos.pages.update({ type: self._instance, _id: { $nin: personIds } }, unset, callback);
     }
   };
 
