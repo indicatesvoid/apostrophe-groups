@@ -10,5 +10,5 @@
 {% endblock %}
 
 {% block mainContent %}
-  {{ renderGroup(group, { full: true, person: { showTitleForGroup: group } }) }}
+  {{ renderGroup(group, { full: true, person: { showTitleForGroupId: group._id } }) }}
 {% endblock %}

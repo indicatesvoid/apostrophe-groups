@@ -22,9 +22,9 @@
         </a>
       </h4>
       {# Show job title for a specific group prominently if any #}
-      {% if options.showTitleForGroup %}
-        {% if person.groupExtras[options.showTitleForGroup._id].jobTitle %}
-          <h5>{{ person.groupExtras[options.showTitleForGroup._id].jobTitle | e }}</h5>
+      {% if options.showJobTitleForGroupId %}
+        {% if person.groupExtras[options.showJobTitleForGroupId].jobTitle %}
+          <h5>{{ person.groupExtras[options.showJobTitleForGroupId].jobTitle | e }}</h5>
         {% endif %}
       {% endif %}
     </div>

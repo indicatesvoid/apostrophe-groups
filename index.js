@@ -205,8 +205,14 @@ groups.Groups = function(optionsArg, callback) {
   self.bestPageById = true;
 
   self.permalink = function(req, snippet, page, callback) {
+    // If a directory page is locked to a single group, we can skip an ugly extra
+    // directory level
+    if (page.typeSettings && page.typeSettings.groupIds && (page.typeSettings.groupIds.length === 1) && (page.typeSettings.groupIds[0] === snippet._id)) {
+      snippet.url = page.slug;
+    } else {
       snippet.url = page.slug + '/' + snippet.slug;
-      return callback(null);
+    }
+    return callback(null);
   };
 
   // The page settings for a directory page are different from other

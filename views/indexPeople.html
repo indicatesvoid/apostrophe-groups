@@ -19,7 +19,11 @@
   {% endif %}
 
   <div class="apos-people">
-    {{ renderPeople(people) }}
+    {% if (oneGroup) %}
+      {{ renderPeople(people, { showJobTitleForGroupId: page.typeSettings.groupIds[0] }) }}
+    {% else %}
+      {{ renderPeople(people) }}
+    {% endif %}
   </div>
 
 {% endblock %}
