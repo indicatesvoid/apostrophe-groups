@@ -112,7 +112,7 @@ groups.Groups = function(optionsArg, callback) {
     // they can be indexed. Blast them with $addToSet and $in, and
     // conversely, $pull and $nin.
 
-    var personIds = _.map(data._peopleInfo, function(personInfo) {
+    var personIds = _.map(data._peopleInfo || [], function(personInfo) {
       return self._apos.sanitizeString(personInfo.value);
     });
     async.series([addId, addExtras, removeId, removeExtras], callback);
@@ -131,7 +131,7 @@ groups.Groups = function(optionsArg, callback) {
     // { title: 'Bob Smith', groupExtras: { someGroupId: { jobTitle: 'Flosser' } } }
 
     function addExtras(callback) {
-      async.eachSeries(data._peopleInfo, function(personInfo, callback) {
+      async.eachSeries(data._peopleInfo || [], function(personInfo, callback) {
         var set = { $set: { } };
         var extras = { };
         // Clone the object so we can modify it
