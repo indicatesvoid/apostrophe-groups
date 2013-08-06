@@ -118,11 +118,11 @@ groups.Groups = function(optionsArg, callback) {
     async.series([addId, addExtras, removeId, removeExtras], callback);
 
     function addId(callback) {
-      return self._apos.pages.update({ _id: { $in: personIds } }, { $addToSet: { groupIds: snippet._id, groupName: snippet.title } }, { multi: true }, callback);
+      return self._apos.pages.update({ _id: { $in: personIds } }, { $addToSet: { groupIds: snippet._id } }, { multi: true }, callback);
     }
 
     function removeId(callback) {
-      return self._apos.pages.update({ type: self._instance, _id: { $nin: personIds } }, { $pull: { groupIds: snippet._id, groupName: snippet.title } }, { multi: true }, callback);
+      return self._apos.pages.update({ type: self._instance, _id: { $nin: personIds } }, { $pull: { groupIds: snippet._id } }, { multi: true }, callback);
     }
 
     // Extras like job titles are stored in an object property
