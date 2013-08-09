@@ -18,5 +18,5 @@
 {% endblock %}
 
 {% block mainContent %}
-  {{ renderPerson(person, { full: true }) }}
+  {{ renderPerson(person, aposMerge(page.typeSettings, { full: true })) }}
 {% endblock %}

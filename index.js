@@ -224,6 +224,7 @@ groups.Groups = function(optionsArg, callback) {
     // So just make sure we have an array of strings
     ok.groupIds = self._apos.sanitizeTags(data.groupIds);
     ok.defaultView = (data.defaultView === 'people') ? 'people' : 'groups';
+    ok.showThumbnail = self._apos.sanitizeBoolean(data.showThumbnail);
     return callback(null, ok);
   };
 
