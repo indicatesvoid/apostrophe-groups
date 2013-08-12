@@ -146,7 +146,7 @@ groups.Groups = function(optionsArg, callback) {
     function removeExtras(callback) {
       var unset = { $unset: { } };
       unset.$unset['groupExtras.' + snippet._id] = 1;
-      return self._apos.pages.update({ type: self._instance, _id: { $nin: personIds } }, unset, callback);
+      return self._apos.pages.update({ type: 'person', _id: { $nin: personIds } }, unset, callback);
     }
   };
 
