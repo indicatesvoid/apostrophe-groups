@@ -20,9 +20,9 @@
 
   <div class="apos-people">
     {% if (oneGroup) %}
-      {{ renderPeople(people, { showJobTitleForGroupId: page.typeSettings.groupIds[0] }) }}
+      {{ renderPeople(people, aposMerge(page.typeSettings, { showJobTitleForGroupId: page.typeSettings.groupIds[0] })) }}
     {% else %}
-      {{ renderPeople(people) }}
+      {{ renderPeople(people, page.typeSettings) }}
     {% endif %}
   </div>
 

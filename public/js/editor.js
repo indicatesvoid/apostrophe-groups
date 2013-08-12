@@ -19,7 +19,8 @@ function AposGroups(optionsArg) {
     serialize: function($el, $details) {
       var data = {
         groupIds: $details.find('[data-name="typeSettings[groupIds]"]').selective('get'),
-        defaultView: $details.findByName('typeSettings[defaultView]').val()
+        defaultView: $details.findByName('typeSettings[defaultView]').val(),
+        showThumbnail: $details.findByName('typeSettings[showThumbnail]').val()
       };
       return data;
     },
@@ -29,6 +30,7 @@ function AposGroups(optionsArg) {
         data: data.groupIds || []
       });
       $details.findByName('typeSettings[defaultView]').val(data.defaultView || 'groups');
+      $details.findByName('typeSettings[showThumbnail]').val(data.showThumbnail ? '1' : '0');
     }
   };
 

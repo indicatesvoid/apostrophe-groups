@@ -10,5 +10,5 @@
 {% endblock %}
 
 {% block mainContent %}
-  {{ renderGroup(group, { full: true }) }}
+  {{ renderGroup(group, aposMerge(page.typeSettings, { full: true })) }}
 {% endblock %}
