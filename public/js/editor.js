@@ -19,6 +19,7 @@ function AposGroups(optionsArg) {
     serialize: function($el, $details) {
       var data = {
         groupIds: $details.find('[data-name="typeSettings[groupIds]"]').selective('get'),
+        notGroupIds: $details.find('[data-name="typeSettings[notGroupIds]"]').selective('get'),
         defaultView: $details.findByName('typeSettings[defaultView]').val(),
         showThumbnail: $details.findByName('typeSettings[showThumbnail]').val()
       };
@@ -28,6 +29,10 @@ function AposGroups(optionsArg) {
       $details.find('[data-name="typeSettings[groupIds]"]').selective({
         source: self._action + '/autocomplete',
         data: data.groupIds || []
+      });
+      $details.find('[data-name="typeSettings[notGroupIds]"]').selective({
+        source: self._action + '/autocomplete',
+        data: data.notGroupIds || []
       });
       $details.findByName('typeSettings[defaultView]').val(data.defaultView || 'groups');
       $details.findByName('typeSettings[showThumbnail]').val(data.showThumbnail ? '1' : '0');

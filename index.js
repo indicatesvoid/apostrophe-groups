@@ -157,6 +157,17 @@ groups.Groups = function(optionsArg, callback) {
     if (options.getPeople === false) {
       getPeople = false;
     }
+    if ((options.groupIds && options.groupIds.length) || (options.notGroupIds && options.notGroupIds.length)) {
+      var $and = [];
+      if (options.groupIds && options.groupIds.length) {
+        $and.push({ _id: { $in: options.groupIds } });
+      }
+      if (options.notGroupIds && options.notGroupIds.length) {
+        $and.push({ _id: { $nin: options.notGroupIds } });
+      }
+      $and.push(criteria);
+      criteria = { $and: $and };
+    }
 
     return superGet.call(self, req, criteria, options, function(err, results) {
       if (err) {
@@ -189,10 +200,12 @@ groups.Groups = function(optionsArg, callback) {
   self.addCriteria = function(req, criteria, options) {
     superAddCriteria.call(self, req, criteria, options);
     if (req.page.typeSettings) {
-      if (req.page.groupIds && req.page.groupIds.length) {
-        criteria = {
-          $and: [ { _id: { $in: req.page.groupIds } }, criteria ]
-        };
+      var settings = req.page.typeSettings;
+      if (settings.groupIds && settings.groupIds.length) {
+        options.groupIds = settings.groupIds;
+      }
+      if (settings.notGroupIds && settings.notGroupIds.length) {
+        options.notGroupIds = settings.groupIds;
       }
     }
   };
@@ -223,6 +236,7 @@ groups.Groups = function(optionsArg, callback) {
     // Selecting nonexistent groups isn't dangerous, it's just silly.
     // So just make sure we have an array of strings
     ok.groupIds = self._apos.sanitizeTags(data.groupIds);
+    ok.notGroupIds = self._apos.sanitizeTags(data.notGroupIds);
     ok.defaultView = (data.defaultView === 'people') ? 'people' : 'groups';
     ok.showThumbnail = self._apos.sanitizeBoolean(data.showThumbnail);
     return callback(null, ok);
@@ -336,14 +350,22 @@ groups.Groups = function(optionsArg, callback) {
 
   self.indexPeople = function(req, callback) {
     var criteria = {};
-    var settings = req.bestPage.typeSettings;
+    var settings = req.bestPage.typeSettings || {};
     if (settings && settings.groupIds && settings.groupIds.length) {
-      criteria.groupIds = { $in: settings.groupIds };
       if (settings.groupIds.length === 1) {
         req.extras.oneGroup = true;
       }
     }
+
     var options = {};
+
+    if (settings.groupIds && settings.groupIds.length) {
+      options.groupIds = settings.groupIds;
+    }
+    if (settings.notGroupIds && settings.notGroupIds.length) {
+      options.notGroupIds = settings.notGroupIds;
+    }
+
     if (req.query.letter) {
       options.letter = req.query.letter;
       req.extras.letter = req.query.letter;
@@ -371,7 +393,16 @@ groups.Groups = function(optionsArg, callback) {
     if (settings && settings.groupIds && settings.groupIds.length) {
       criteria._id = { $in: settings.groupIds };
     }
-    return self.get(req, criteria, { permalink: req.bestPage }, function(err, results) {
+    var options = { permalink: req.bestPage };
+
+    if (settings.groupIds && settings.groupIds.length) {
+      options.groupIds = settings.groupIds;
+    }
+    if (settings.notGroupIds && settings.notGroupIds.length) {
+      options.notGroupIds = settings.notGroupIds;
+    }
+
+    return self.get(req, criteria, options, function(err, results) {
       if (err) {
         return callback(err);
       }
