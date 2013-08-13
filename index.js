@@ -122,7 +122,7 @@ groups.Groups = function(optionsArg, callback) {
     }
 
     function removeId(callback) {
-      return self._apos.pages.update({ type: self._instance, _id: { $nin: personIds } }, { $pull: { groupIds: snippet._id } }, { multi: true }, callback);
+      return self._apos.pages.update({ type: self._people._instance, _id: { $nin: personIds } }, { $pull: { groupIds: snippet._id } }, { multi: true }, callback);
     }
 
     // Extras like job titles are stored in an object property
@@ -146,7 +146,7 @@ groups.Groups = function(optionsArg, callback) {
     function removeExtras(callback) {
       var unset = { $unset: { } };
       unset.$unset['groupExtras.' + snippet._id] = 1;
-      return self._apos.pages.update({ type: 'person', _id: { $nin: personIds } }, unset, callback);
+      return self._apos.pages.update({ type: self._people._instance, _id: { $nin: personIds } }, unset, callback);
     }
   };
 
