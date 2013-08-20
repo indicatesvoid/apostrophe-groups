@@ -41,7 +41,8 @@ groups.Groups = function(optionsArg, callback) {
       // Options to be passed to the browser side constructor
       // Allows us to talk to the autocomplete action for people
       options: {
-        peopleAction: self._people._action
+        peopleAction: self._people._action,
+        peopleSortable: optionsArg.peopleSortable
       }
     },
     // Permissions checkboxes to be offered when editing groups. This set
@@ -52,6 +53,8 @@ groups.Groups = function(optionsArg, callback) {
   };
 
   extend(true, options, optionsArg);
+
+  self._peopleSortable = options.peopleSortable;
 
   // Make sure the permissions list is visible to our asset templates and to browser-side JS
   extend(true, options, {
@@ -131,14 +134,20 @@ groups.Groups = function(optionsArg, callback) {
     // { title: 'Bob Smith', groupExtras: { someGroupId: { jobTitle: 'Flosser' } } }
 
     function addExtras(callback) {
+      var n = 0;
       async.eachSeries(data._peopleInfo || [], function(personInfo, callback) {
         var set = { $set: { } };
         var extras = { };
         // Clone the object so we can modify it
         extend(true, extras, personInfo);
+        // We're setting the rank.
+        if (self._peopleSortable) {
+          extras.rank = n;
+        }
         // Do not redundantly store the ID
         delete extras.value;
         set.$set['groupExtras.' + snippet._id] = extras;
+        n++; //We're incrementing our counter for sort order
         return self._apos.pages.update({ _id: personInfo.value }, set, callback);
       }, callback);
     }
@@ -184,11 +193,21 @@ groups.Groups = function(optionsArg, callback) {
         if (!getPeople) {
           return callback(null);
         }
+        var getOptions = {
+          getGroups: false,
+          permalink: options.permalink
+        };
+        if (self._peopleSortable && (snippets.length === 1))  {
+          var sortByString = "groupExtras." + snippets[0]._id + ".rank";
+          getOptions.sort = {};
+          getOptions.sort[sortByString] = 1;
+        }
         // We want to permalink to the same directory page, if any
-        return self._apos.joinByArrayReverse(req, snippets, 'groupIds', '_people', { get: self._people.get, getOptions: { getGroups: false, permalink: options.permalink } }, function(err) {
+        return self._apos.joinByArrayReverse(req, snippets, 'groupIds', '_people', { get: self._people.get, getOptions: getOptions }, function(err) {
           if (err) {
             return callback(err);
           }
+
           return callback(null, results);
         });
       }

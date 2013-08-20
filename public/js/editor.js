@@ -50,6 +50,7 @@ function AposGroups(optionsArg) {
   self.afterPopulatingEditor = function($el, snippet, callback) {
     $el.findByName('permissions').val(apos.tagsToString(snippet.permissions));
     $el.find('[data-name="people"]').selective({
+      sortable: options.peopleSortable,
       extras: true,
       source: self._peopleAction + '/autocomplete',
       data: _.map(snippet._people || [], function(person) {
