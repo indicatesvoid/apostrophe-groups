@@ -9,10 +9,6 @@ function AposGroups(optionsArg) {
   $.extend(options, optionsArg);
   AposSnippets.call(self, options);
 
-  if (options.peopleAction) {
-    self._peopleAction = options.peopleAction;
-  }
-
   // PAGE SETTINGS FOR THIS TYPE
 
   self.settings = {
@@ -52,7 +48,7 @@ function AposGroups(optionsArg) {
     $el.find('[data-name="people"]').selective({
       sortable: options.peopleSortable,
       extras: true,
-      source: self._peopleAction + '/autocomplete',
+      source: aposPages.getType('people')._action + '/autocomplete',
       data: _.map(snippet._people || [], function(person) {
         var data = { label: person.title, value: person._id };
         if (person.groupExtras && person.groupExtras[snippet._id]) {

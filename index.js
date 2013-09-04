@@ -29,19 +29,16 @@ function groups(options, callback) {
 groups.Groups = function(optionsArg, callback) {
   var self = this;
 
-  self._people = optionsArg.people;
-
   var options = {
     instance: 'group',
     name: 'groups',
     label: 'Directory',
     icon: 'directory',
     menuName: 'aposGroupsMenu',
+    peopleType: 'people',
     browser: {
       // Options to be passed to the browser side constructor
-      // Allows us to talk to the autocomplete action for people
       options: {
-        peopleAction: self._people._action,
         peopleSortable: optionsArg.peopleSortable
       }
     },
@@ -71,12 +68,7 @@ groups.Groups = function(optionsArg, callback) {
   });
 
   self._permissions = options.permissions;
-
-  if (!options.browserOptions) {
-    options.browserOptions = {};
-  }
-  options.browserOptions.peopleAction = self._people.action;
-
+  self._peopleType = options.peopleType;
   options.modules = (options.modules || []).concat([ { dir: __dirname, name: 'groups' } ]);
 
   // TODO this is kinda ridiculous. We need to have a way to call a function that
@@ -96,7 +88,7 @@ groups.Groups = function(optionsArg, callback) {
   }
 
   // Call the base class constructor. Don't pass the callback, we want to invoke it
-  // ourselves after constructing more stuff
+  // ourselves after adding methods
   snippets.Snippets.call(this, options, null);
 
   self.beforeSave = function(req, data, snippet, callback) {
@@ -125,7 +117,7 @@ groups.Groups = function(optionsArg, callback) {
     }
 
     function removeId(callback) {
-      return self._apos.pages.update({ type: self._people._instance, _id: { $nin: personIds } }, { $pull: { groupIds: snippet._id } }, { multi: true }, callback);
+      return self._apos.pages.update({ type: self.getPeopleInstance(), _id: { $nin: personIds } }, { $pull: { groupIds: snippet._id } }, { multi: true }, callback);
     }
 
     // Extras like job titles are stored in an object property
@@ -155,7 +147,7 @@ groups.Groups = function(optionsArg, callback) {
     function removeExtras(callback) {
       var unset = { $unset: { } };
       unset.$unset['groupExtras.' + snippet._id] = 1;
-      return self._apos.pages.update({ type: self._people._instance, _id: { $nin: personIds } }, unset, callback);
+      return self._apos.pages.update({ type: self.getPeopleInstance(), _id: { $nin: personIds } }, unset, callback);
     }
   };
 
@@ -203,7 +195,7 @@ groups.Groups = function(optionsArg, callback) {
           getOptions.sort[sortByString] = 1;
         }
         // We want to permalink to the same directory page, if any
-        return self._apos.joinByArrayReverse(req, snippets, 'groupIds', '_people', { get: self._people.get, getOptions: getOptions }, function(err) {
+        return self._apos.joinByArrayReverse(req, snippets, 'groupIds', '_people', { get: self.getPeopleManager().get, getOptions: getOptions }, function(err) {
           if (err) {
             return callback(err);
           }
@@ -338,7 +330,7 @@ groups.Groups = function(optionsArg, callback) {
       }
       type = snippet.type;
 
-      if (type === 'person') {
+      if (type === self.getPeopleInstance()) {
         return self.showPerson(req, slug, callback);
       }
 
@@ -353,7 +345,7 @@ groups.Groups = function(optionsArg, callback) {
   };
 
   self.showPerson = function(req, slug, callback) {
-    return self._people.getOne(req, { slug: slug }, { permalink: req.bestPage }, function(err, person) {
+    return self.getPeopleManager().getOne(req, { slug: slug }, { permalink: req.bestPage }, function(err, person) {
       if (err) {
         return callback(err);
       }
@@ -396,11 +388,10 @@ groups.Groups = function(optionsArg, callback) {
       options.sort[sortByString] = 1;
     }
 
-    // pager?
     self.addPager(req, options);
 
     options.permalink = req.bestPage;
-    return self._people.get(req, criteria, options, function(err, results) {
+    return self.getPeopleManager().get(req, criteria, options, function(err, results) {
       if (err) {
         return callback(err);
       }
@@ -450,6 +441,14 @@ groups.Groups = function(optionsArg, callback) {
       req.template = self.renderer('showGroup');
       return callback(null);
     });
+  };
+
+  self.getPeopleManager = function() {
+    return self._pages.getType(self._peopleType);
+  };
+
+  self.getPeopleInstance = function() {
+    return self.getPeopleManager()._instance;
   };
 
   self._apos.tasks['generate-users-and-groups'] = function(callback) {
@@ -528,7 +527,7 @@ groups.Groups = function(optionsArg, callback) {
           }
         }
         var person = {
-          type: 'person',
+          type: self._peopleType,
           title: title,
           firstName: firstName,
           lastName: lastName,
