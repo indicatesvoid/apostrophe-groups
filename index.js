@@ -295,7 +295,8 @@ groups.Groups = function(optionsArg, callback) {
     // default view is people, redirect to shorten the URL
     if (req.remainder.match(/^\/people$/)) {
       if (defaultView === 'people') {
-        req.redirect = req.url.replace(/\/people$/, '');
+        // Careful don't fail to match because of a query string
+        req.redirect = req.url.replace(/\/people(\?|$)/, '$1');
         return callback(null);
       }
       return self.indexPeople(req, callback);

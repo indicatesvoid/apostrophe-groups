@@ -1,6 +1,8 @@
 {# To render full bio: renderPeople(people, { full: true } ) #}
 {# To render compact: renderPeople(people) #}
 
+{% include 'pagerMacros.html' %}
+
 {% macro renderPeople(people, options = {}) %}
   {% for person in people %}
     {{ renderPerson(person, options) }}

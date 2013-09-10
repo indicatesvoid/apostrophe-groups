@@ -25,5 +25,7 @@
       {{ renderPeople(people, page.typeSettings) }}
     {% endif %}
   </div>
+  {% set peopleUrl = page.url + '/people' %}
+  {{ renderPager(pager, peopleUrl) }}
 
 {% endblock %}

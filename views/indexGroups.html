@@ -19,5 +19,7 @@
   <div class="apos-groups">
     {{ renderGroups(groups, page.typeSettings) }}
   </div>
+  {% set peopleUrl = page.url + '/people' %}
+  {{ renderPager(pager, peopleUrl) }}
 
 {% endblock %}
