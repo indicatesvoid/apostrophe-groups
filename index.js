@@ -383,6 +383,10 @@ groups.Groups = function(optionsArg, callback) {
       req.extras.letter = req.query.letter;
     }
 
+    if (req.query.q) {
+      options.q = req.query.q;
+    }
+
      if (self._peopleSortable && settings.groupIds  && (settings.groupIds.length === 1))  {
       var sortByString = "groupExtras." + settings.groupIds[0] + ".rank";
       options.sort = {};
