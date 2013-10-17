@@ -195,7 +195,7 @@ groups.Groups = function(optionsArg, callback) {
           getOptions.sort[sortByString] = 1;
         }
         // We want to permalink to the same directory page, if any
-        return self._apos.joinByArrayReverse(req, snippets, 'groupIds', '_people', { get: self.getPeopleManager().get, getOptions: getOptions }, function(err) {
+        return self._apos.joinByArrayReverse(req, snippets, 'groupIds', undefined, '_people', { get: self.getPeopleManager().get, getOptions: getOptions }, function(err) {
           if (err) {
             return callback(err);
           }

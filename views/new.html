@@ -18,8 +18,9 @@
 
       {{ snippetSelective('people', 'People', {
         placeholder: 'Type Name Here',
-        extras: {
-          'jobTitle': {
+        extras: [
+          {
+            name: 'jobTitle',
             label: 'Job Title',
             type: 'text'
           }
