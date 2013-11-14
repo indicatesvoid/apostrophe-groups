@@ -33,6 +33,8 @@ groups.Groups = function(optionsArg, callback) {
     instance: 'group',
     name: 'groups',
     label: 'Directory',
+    pluralLabel: 'Groups',
+    instanceLabel: 'Group',
     icon: 'directory',
     menuName: 'aposGroupsMenu',
     peopleType: 'people',
