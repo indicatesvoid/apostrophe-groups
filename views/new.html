@@ -1,48 +1,26 @@
+{% extends 'newBase.html' %}
 {% include 'snippetMacros.html' %}
-<div class="apos-modal apos-template {% block class %}{{ newClass }}{% endblock %}">
-  <h3>{% block label %}New {{ instanceLabel | e }}{% endblock %}</h3>
-  {% block topButtons %}
-  {# Makes more sense in edit view #}
-  {# {{ snippetNewButtons() }} #}
-  {% endblock %}
-  <div class="apos-modal-body">
-     <form>
-      {# title is universal across all snippets and should be the group's name #}
-      {{ snippetText('title', 'Name') }}
 
-      {# TODO it would be nice to have hints to indicate when permissions are mutually #}
-      {# exclusive so that the interface could be a select element but let's start with #}
-      {# something that works in the more general case too #}
+{% block insideForm %}
 
-      {% for permission in type.permissions %}
-        {{ formBoolean(permission.value, permission.label) }}
-      {% endfor %}
+  {{ snippetAllFields(fields, { before: 'thumbnail' }) }}
 
-      {{ snippetSelective('people', 'People', {
-        placeholder: 'Type Name Here',
-        extras: [
-          {
-            name: 'jobTitle',
-            label: 'Job Title',
-            type: 'text'
-          }
-        }
-      }) }}
+  {% for permission in type.permissions %}
+    {{ formBoolean(permission.value, permission.label) }}
+  {% endfor %}
 
-      {# Slugs become editable later, allow the edit template to add them here #}
-      {% block slug %}{% endblock %}
-      {{ snippetTags('tags', 'Tags (comma-separated)') }}
+  {{ snippetSelective('people', 'People', {
+    placeholder: 'Type Name Here',
+    extras: [
+      {
+        name: 'jobTitle',
+        label: 'Job Title',
+        type: 'text'
+      }
+    }
+  }) }}
 
-      {{ snippetBoolean('published', 'Published') }}
+  {{ snippetAllFields(fields, { from: 'thumbnail' }) }}
 
-      {# Calls the various snippet macros for us, for every field that is defined #}
-      {# in the schema. You can call them individually instead, or mix and match #}
-      {# using the 'from' and 'to' arguments to snippetAllFields #}
-      {{ snippetAllFields(fields) }}
-    </form>
-  </div>
-  {% block buttons %}
-  {{ snippetNewButtons() }}
-  {% endblock %}
-</div>
+{% endblock %}
 

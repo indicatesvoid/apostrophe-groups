@@ -3,22 +3,6 @@ var _ = require('underscore');
 var extend = require('extend');
 var snippets = require('apostrophe-snippets');
 var util = require('util');
-// For generating sample people and groups
-var passwordHash = require('password-hash');
-
-// Creating an instance of the groups module is easy:
-// var groups = require('apostrophe-groups')(options, callback);
-//
-// If you want to access the constructor function for use in the
-// constructor of a module that extends this one, consider:
-//
-// var groups = require('apostrophe-groups');
-// ... Inside the constructor for the new object ...
-// groups.Groups.call(this, options, null);
-//
-// In fact, this module does exactly that to extend the snippets module
-// (see below). Something similar happens on the browser side in
-// main.js.
 
 module.exports = groups;
 
@@ -71,6 +55,8 @@ groups.Groups = function(optionsArg, callback) {
 
   self._permissions = options.permissions;
   self._peopleType = options.peopleType;
+
+  options.removeFields = [ 'hideTitle' ].concat(options.removeFields);
   options.modules = (options.modules || []).concat([ { dir: __dirname, name: 'groups' } ]);
 
   // TODO this is kinda ridiculous. We need to have a way to call a function that
@@ -562,7 +548,7 @@ groups.Groups = function(optionsArg, callback) {
           person.username = person.slug;
           var _password = randomWords({ exactly: 5, join: ' ' });
           console.log('Password for ' + person.slug + ' is: ' + _password);
-          person.password = passwordHash.generate(_password);
+          person.password = self._apos.hashPassword(_password);
         }
         // Insert the pages properly so we don't have
         // issues with searchability
