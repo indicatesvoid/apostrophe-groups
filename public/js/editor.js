@@ -37,7 +37,7 @@ function AposGroups(optionsArg) {
 
   self.beforeSave = function($el, data, callback) {
     data._peopleInfo = $el.find('[data-name="people"]').selective('get');
-    _.each(options.permissions, function(permission) {
+    _.each(apos.data.aposGroups.permissions, function(permission) {
       data[permission.value] = $el.findByName(permission.value).val();
     });
     return callback();
@@ -57,7 +57,7 @@ function AposGroups(optionsArg) {
         return data;
       })
     });
-    _.each(options.permissions, function(permission) {
+    _.each(apos.data.aposGroups.permissions, function(permission) {
       $el.findByName(permission.value).val(_.contains(snippet.permissions || [], permission.value) ? '1' : '0');
     });
     return callback();

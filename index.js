@@ -27,33 +27,13 @@ groups.Groups = function(optionsArg, callback) {
       options: {
         peopleSortable: optionsArg.peopleSortable
       }
-    },
-    // Permissions checkboxes to be offered when editing groups. This set
-    // is what the standard permissions methods in the apostrophe module
-    // check for. If you are overriding those, you may need to override or
-    // extend this option too.
-    permissions: [ { value: 'guest', label: 'Guest' }, { value: 'edit', label: 'Editor' }, { value: 'admin', label: 'Admin' } ]
+    }
   };
 
   extend(true, options, optionsArg);
 
   self._peopleSortable = options.peopleSortable;
 
-  // Make sure the permissions list is visible to our asset templates and to browser-side JS
-  extend(true, options, {
-    rendererGlobals: {
-      type: {
-        permissions: options.permissions
-      }
-    },
-    browser: {
-      options: {
-        permissions: options.permissions
-      }
-    }
-  });
-
-  self._permissions = options.permissions;
   self._peopleType = options.peopleType;
 
   options.removeFields = [ 'hideTitle' ].concat(options.removeFields);
@@ -78,6 +58,45 @@ groups.Groups = function(optionsArg, callback) {
   // Call the base class constructor. Don't pass the callback, we want to invoke it
   // ourselves after adding methods
   snippets.Snippets.call(this, options, null);
+
+  var superPushAllAssets = self.pushAllAssets;
+
+  self.pushAllAssets = function() {
+    var permissions;
+    if (options.permissions) {
+      permissions = options.permissions;
+    } else {
+      // Base permissions list
+      permissions = [ { value: 'guest', label: 'Guest' }, { value: 'edit', label: 'Editor' }, { value: 'admin', label: 'Admin: All' } ];
+      // Type-specific admin permissions
+      var instanceTypes = self._pages.getAllInstanceTypeNames();
+      permissions = permissions.concat(instanceTypes.map(function(type) {
+        return {
+          value: 'admin-' + self._apos.cssName(type),
+          label: 'Admin: ' + self._pages.getManager(type).pluralLabel
+        };
+      }));
+    }
+
+    // Make sure the permissions list is visible to our asset templates and to browser-side JS
+    extend(true, self._rendererGlobals, {
+      type: {
+        permissions: permissions
+      }
+    });
+
+    self._apos.pushGlobalData({
+      'aposGroups': {
+        permissions: permissions
+      }
+    });
+
+    self._permissions = permissions;
+
+    // Now we can push the template assets that are rendered with the
+    // permissions list via rendererGlobals
+    return superPushAllAssets();
+  };
 
   self.beforeSave = function(req, data, snippet, callback) {
     snippet.permissions = [];
