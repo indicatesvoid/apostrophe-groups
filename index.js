@@ -13,6 +13,9 @@ function groups(options, callback) {
 groups.Groups = function(optionsArg, callback) {
   var self = this;
 
+  // Only admins can edit this data type
+  self._adminOnly = true;
+
   var options = {
     instance: 'group',
     name: 'groups',
@@ -70,12 +73,22 @@ groups.Groups = function(optionsArg, callback) {
       permissions = [ { value: 'guest', label: 'Guest' }, { value: 'edit', label: 'Editor' }, { value: 'admin', label: 'Admin: All' } ];
       // Type-specific admin permissions
       var instanceTypes = self._pages.getAllInstanceTypeNames();
-      permissions = permissions.concat(instanceTypes.map(function(type) {
-        return {
-          value: 'admin-' + self._apos.cssName(type),
-          label: 'Admin: ' + self._pages.getManager(type).pluralLabel
-        };
-      }));
+      _.each(instanceTypes, function(type) {
+        if (!self._pages.getManager(type)._adminOnly) {
+          permissions.push({
+            value: 'admin-' + self._apos.cssName(type),
+            label: 'Admin: ' + self._pages.getManager(type).pluralLabel
+          });
+          permissions.push({
+            value: 'edit-' + self._apos.cssName(type),
+            label: 'Edit: ' + self._pages.getManager(type).pluralLabel
+          });
+          permissions.push({
+            value: 'submit-' + self._apos.cssName(type),
+            label: 'Submit: ' + self._pages.getManager(type).pluralLabel
+          });
+        }
+      });
     }
 
     // Make sure the permissions list is visible to our asset templates and to browser-side JS
@@ -586,18 +599,6 @@ groups.Groups = function(optionsArg, callback) {
       }
     }
   };
-
-  // Use a permissions event handler to put the kibosh on
-  // any editing of groups by non-admins for now. Too easy
-  // to make your buddies admins or disenfranchise your foes.
-
-  self._apos.on('permissions', function(req, action, result) {
-    if (action.match(/\-group$/) && (action !== 'view-group')) {
-      if (!(req.user && req.user.permissions.admin)) {
-        result.response = 'Forbidden';
-      }
-    }
-  });
 
   if (callback) {
     // Invoke callback on next tick so that the groups object
