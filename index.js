@@ -422,7 +422,11 @@ groups.Groups = function(optionsArg, callback) {
       }
       self.setPagerTotal(req, results.total);
       req.extras.people = results.snippets;
-      req.template = self.renderer('indexPeople');
+      if ((req.xhr || req.query.xhr) && (!req.query.apos_refresh)) {
+        req.template = self.renderer('indexPeopleAjax');
+      } else {
+        req.template = self.renderer('indexPeople');
+      }
       return callback(null);
     });
   };
