@@ -9,12 +9,12 @@
     {{ formBoolean(permission.value, permission.label) }}
   {% endfor %}
 
-  {{ snippetSelective('people', 'People', {
-    placeholder: 'Type Name Here',
+  {{ snippetSelective('people', __('People'), {
+    placeholder: __('Type Name Here'),
     extras: [
       {
         name: 'jobTitle',
-        label: 'Job Title',
+        label: __('Job Title'),
         type: 'text'
       }
     }

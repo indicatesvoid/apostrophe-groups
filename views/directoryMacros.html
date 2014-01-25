@@ -62,7 +62,7 @@
       {{ renderGroup(item, options) }}
     {% endfor %}
   {% else %}
-    <h4>There are no suitable groups at the moment.</h4>
+    <h4>{{ __('There are no suitable groups at the moment.') }}</h4>
   {% endif %}
 {% endmacro %}
 
@@ -87,7 +87,7 @@
     {% if options.full %}
       <div class="apos-group-body">{{ aposArea({ area: group.areas.body }) }}</div>
       {% if (group._people) %}
-        <h4>Team Members</h4>
+        <h4>{{ __('Team Members') }}</h4>
         <div class="apos-people">
           {{ renderPeople(group._people,
             aposMerge(options.person, { showJobTitleForGroupId: group._id, showThumbnail: options.showThumbnail })) }}
