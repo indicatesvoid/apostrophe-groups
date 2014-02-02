@@ -5,3 +5,7 @@ The `apostrophe-groups` module, together with [apostrophe-people](http://github.
 You must have both the people module and the groups module.
 
 [See the `apostrophe-people` module](http://github.com/punkave/apostrophe-people) for complete documentation.
+
+### Code Stability
+
+0.4.x releases receive bug fixes only. For active development, follow 0.5.x releases and/or the master branch in github.
