@@ -68,16 +68,3 @@ function AposGroups(optionsArg) {
   };
 }
 
-AposGroups.addWidgetType = function(options) {
-  if (!options) {
-    options = {};
-  }
-  _.defaults(options, {
-    name: 'groups',
-    label: 'Groups',
-    action: '/apos-groups',
-    defaultLimit: 5
-  });
-  AposSnippets.addWidgetType(options);
-};
-
