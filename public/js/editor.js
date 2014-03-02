@@ -14,24 +14,24 @@ function AposGroups(optionsArg) {
   self.settings = {
     serialize: function($el, $details) {
       var data = {
-        groupIds: $details.find('[data-name="typeSettings[groupIds]"]').selective('get'),
-        notGroupIds: $details.find('[data-name="typeSettings[notGroupIds]"]').selective('get'),
-        defaultView: $details.findByName('typeSettings[defaultView]').val(),
-        showThumbnail: $details.findByName('typeSettings[showThumbnail]').val()
+        groupIds: $details.find('[data-name="groupIds"]').selective('get'),
+        notGroupIds: $details.find('[data-name="notGroupIds"]').selective('get'),
+        defaultView: $details.findByName('defaultView').val(),
+        showThumbnail: $details.findByName('showThumbnail').val()
       };
       return data;
     },
     unserialize: function(data, $el, $details) {
-      $details.find('[data-name="typeSettings[groupIds]"]').selective({
+      $details.find('[data-name="groupIds"]').selective({
         source: self._action + '/autocomplete',
         data: data.groupIds || []
       });
-      $details.find('[data-name="typeSettings[notGroupIds]"]').selective({
+      $details.find('[data-name="notGroupIds"]').selective({
         source: self._action + '/autocomplete',
         data: data.notGroupIds || []
       });
-      $details.findByName('typeSettings[defaultView]').val(data.defaultView || 'groups');
-      $details.findByName('typeSettings[showThumbnail]').val(data.showThumbnail ? '1' : '0');
+      $details.findByName('defaultView').val(data.defaultView || 'groups');
+      $details.findByName('showThumbnail').val(data.showThumbnail ? '1' : '0');
     }
   };
 
@@ -67,17 +67,4 @@ function AposGroups(optionsArg) {
     $snippet.find('[data-published]').val(snippet.published ? 'Yes' : 'No');
   };
 }
-
-AposGroups.addWidgetType = function(options) {
-  if (!options) {
-    options = {};
-  }
-  _.defaults(options, {
-    name: 'groups',
-    label: 'Groups',
-    action: '/apos-groups',
-    defaultLimit: 5
-  });
-  AposSnippets.addWidgetType(options);
-};
 

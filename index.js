@@ -230,15 +230,8 @@ groups.Groups = function(optionsArg, callback) {
   var superAddCriteria = self.addCriteria;
   self.addCriteria = function(req, criteria, options) {
     superAddCriteria.call(self, req, criteria, options);
-    if (req.page.typeSettings) {
-      var settings = req.page.typeSettings;
-      if (settings.groupIds && settings.groupIds.length) {
-        options.groupIds = settings.groupIds;
-      }
-      if (settings.notGroupIds && settings.notGroupIds.length) {
-        options.notGroupIds = settings.groupIds;
-      }
-    }
+    options.groupIds = req.page.groupIds;
+    options.notGroupIds = req.page.notGroupIds;
   };
 
   // Adjust the best page matching algorithm to look at the groupIds property
@@ -251,7 +244,7 @@ groups.Groups = function(optionsArg, callback) {
   self.permalink = function(req, snippet, page, callback) {
     // If a directory page is locked to a single group, we can skip an ugly extra
     // directory level
-    if (page.typeSettings && page.typeSettings.groupIds && (page.typeSettings.groupIds.length === 1) && (page.typeSettings.groupIds[0] === snippet._id)) {
+    if (page.groupIds && (page.groupIds.length === 1) && (page.groupIds[0] === snippet._id)) {
       snippet.url = page.slug;
     } else {
       snippet.url = page.slug + '/' + snippet.slug;
@@ -277,17 +270,17 @@ groups.Groups = function(optionsArg, callback) {
   // in page settings.
 
   self.getDefaultView = function(req) {
-    var settings = req.bestPage.typeSettings;
-      if (settings && settings.groupIds.length === 1) {
-        // If the page is locked down to only one group it doesn't
-        // make sense to show an index of groups. We should already
-        // know what group it is from context. TODO: it would be
-        // nice if you could see this was going to happen when you
-        // picked just one group in page settings.
-        return 'people';
-      }
-    if (req.bestPage.typeSettings && req.bestPage.typeSettings.defaultView) {
-      return req.bestPage.typeSettings.defaultView;
+    var settings = req.bestPage;
+    if (settings && settings.groupIds.length === 1) {
+      // If the page is locked down to only one group it doesn't
+      // make sense to show an index of groups. We should already
+      // know what group it is from context. TODO: it would be
+      // nice if you could see this was going to happen when you
+      // picked just one group in page settings.
+      return 'people';
+    }
+    if (req.bestPage.defaultView) {
+      return req.bestPage.defaultView;
     }
     return 'groups';
   };
@@ -382,7 +375,7 @@ groups.Groups = function(optionsArg, callback) {
 
   self.indexPeople = function(req, callback) {
     var criteria = {};
-    var settings = req.bestPage.typeSettings || {};
+    var settings = req.bestPage;
     if (settings && settings.groupIds && settings.groupIds.length) {
       if (settings.groupIds.length === 1) {
         req.extras.oneGroup = true;
@@ -440,7 +433,7 @@ groups.Groups = function(optionsArg, callback) {
   self.indexGroups = function(req, callback) {
     // List of groups. The template can see groups
     var criteria = {};
-    var settings = req.bestPage.typeSettings;
+    var settings = req.bestPage;
     if (settings && settings.groupIds && settings.groupIds.length) {
       criteria._id = { $in: settings.groupIds };
     }
