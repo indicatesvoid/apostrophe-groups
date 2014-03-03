@@ -496,15 +496,14 @@ groups.Groups = function(optionsArg, callback) {
           testData: true,
           // Most but not all groups will be published
           published: Math.random() > 0.8,
-          areas: {
-            body: {
-              items: [
-                {
-                  type: 'richText',
-                  content: randomWords({ min: 50, max: 200, join: ' ' })
-                }
-              ]
-            }
+          body: {
+            type: 'area',
+            items: [
+              {
+                type: 'richText',
+                content: randomWords({ min: 50, max: 200, join: ' ' })
+              }
+            ]
           }
         };
         // Insert the pages properly so we don't have
@@ -562,15 +561,14 @@ groups.Groups = function(optionsArg, callback) {
           slug: self._apos.slugify(title),
           groupIds: groupIds,
           testData: true,
-          areas: {
-            body: {
-              items: [
-                {
-                  type: 'richText',
-                  content: randomWords({ min: 50, max: 200, join: ' ' })
-                }
-              ]
-            }
+          body: {
+            type: 'area',
+            items: [
+              {
+                type: 'richText',
+                content: randomWords({ min: 50, max: 200, join: ' ' })
+              }
+            ]
           }
         };
         if (Math.random() > 0.25) {

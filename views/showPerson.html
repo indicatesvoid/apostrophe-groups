@@ -16,8 +16,8 @@
 {# Facebook image, so it doesn't hoover up images from the dropdown menus #}
 {# Works only if you specify an absolute URL for uploadsUrl in data/local.js #}
 
-{% set firstImage = aposAreaFindFile({ area: person.areas.thumbnail, group: 'images'}) or
-  aposAreaFindFile({ area: person.areas.body, group: 'images' }) %}
+{% set firstImage = aposAreaImage(person, 'thumbnail') or
+  aposAreaImage(person, 'body') %}
 
 {% block extraHead %}
   {% if firstImage %}

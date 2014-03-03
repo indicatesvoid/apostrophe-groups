@@ -16,7 +16,7 @@
   <div class="apos-person">
     {% if options.full or options.showThumbnail %}
       <div class="apos-thumbnail">
-        {{ aposSingleton({ slug: person.slug + ':thumbnail', type: 'slideshow', area: person.areas.thumbnail, edit: false, size: 'one-sixth' }) }}
+        {{ aposSingleton(person, 'thumbnail', 'slideshow', { size: 'one-sixth' }) }}
       </div>
     {% endif %}
     <div class="apos-person-heading">
@@ -33,7 +33,7 @@
       {% endif %}
     </div>
     {% if options.full %}
-      <div class="apos-person-body">{{ aposArea({ area: person.areas.body }) }}</div>
+      <div class="apos-person-body">{{ aposArea(person, 'body') }}</div>
       {% if person._groups %}
         <div class="apos-person-groups">
           Affiliated with:
@@ -79,13 +79,13 @@
 {% macro renderGroup(group, options = {}) %}
   <div class="apos-group">
     <div class="apos-thumbnail">
-      {{ aposSingleton({ slug: group.slug + ':thumbnail', type: 'slideshow', area: group.areas.thumbnail, edit: false, size: 'one-sixth' }) }}
+      {{ aposSingleton(group, 'thumbnail', 'slideshow', { size: 'one-sixth' }) }}
     </div>
     <div class="apos-group-heading">
       <h4><a href="{{ group.url }}">{{ group.title | e }}</a></h4>
     </div>
     {% if options.full %}
-      <div class="apos-group-body">{{ aposArea({ area: group.areas.body }) }}</div>
+      <div class="apos-group-body">{{ aposArea(group, 'body') }}</div>
       {% if (group._people) %}
         <h4>{{ __('Team Members') }}</h4>
         <div class="apos-people">
