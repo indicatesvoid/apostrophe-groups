@@ -13,8 +13,8 @@
     {# type of index to be offered. You can also subclass and override #}
     {# the groupsLabel or peopleLabel block #}
     <div class="snippets-filter clearfix">
-      <h2 class="groups"><a href="{{ page.url }}/groups">{% block groupsLabel %}Groups{% endblock %}</a></h2>
-      <h2 class="people active">{% block peopleLabel %}People{% endblock %}</h2>
+      <h2 class="groups"><a href="{{ page.url }}/groups">{% block groupsLabel %}{{ __('Groups') }}{% endblock %}</a></h2>
+      <h2 class="people active">{% block peopleLabel %}{{ __('People') }}{% endblock %}</h2>
     </div>
   {% endif %}
 
