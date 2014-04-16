@@ -14,8 +14,8 @@ function AposGroups(optionsArg) {
   self.settings = {
     serialize: function($el, $details) {
       var data = {
-        groupIds: $details.find('[data-name="groupIds"]').selective('get'),
-        notGroupIds: $details.find('[data-name="notGroupIds"]').selective('get'),
+        groupIds: $details.find('[data-name="groupIds"]').selective('get', { incomplete: true }),
+        notGroupIds: $details.find('[data-name="notGroupIds"]').selective('get', { incomplete: true }),
         defaultView: $details.findByName('defaultView').val(),
         showThumbnail: $details.findByName('showThumbnail').val()
       };
@@ -36,7 +36,7 @@ function AposGroups(optionsArg) {
   };
 
   self.beforeSave = function($el, data, callback) {
-    data._peopleInfo = $el.find('[data-name="people"]').selective('get');
+    data._peopleInfo = $el.find('[data-name="people"]').selective('get', { incomplete: true });
     _.each(apos.data.aposGroups.permissions, function(permission) {
       data[permission.value] = $el.findByName(permission.value).val();
     });
