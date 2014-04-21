@@ -1,0 +1,11 @@
+{% include 'formMacros.html' %}
+<div class="apos-template {{ pageSettingsClass }}">
+{{ formSelective('groupIds', 'Members Of These Groups Only') }}
+{{ formSelective('notGroupIds', 'Never Members Of These Groups') }}
+{{ formSelect('defaultView', 'Default View', [
+  { value: 'groups', label: "Show Groups" },
+  { value: 'people', label: "Show People" }
+]) }}
+{{ formBoolean('showThumbnail', 'Headshots In List View') }}
+<p>If you select only one group via "These Groups Only," the page will automatically default to listing people.</p>
+</div>

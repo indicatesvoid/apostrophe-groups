@@ -415,7 +415,7 @@ groups.Groups = function(optionsArg, callback) {
       }
       self.setPagerTotal(req, results.total);
       req.extras.people = results.snippets;
-      if ((req.xhr || req.query.xhr) && (!req.query.apos_refresh)) {
+      if ((req.xhr || req.query.xhr) && (!req.query.apos_refresh) && (!req.query.pageInformation)) {
         if (!results.snippets.length) {
           // So bottomless stops loading pages in infinite scroll
           req.notfound = true;
