@@ -255,7 +255,7 @@ groups.Groups = function(optionsArg, callback) {
   // The page settings for a directory page are different from other
   // collection pages. There's no tag picker, just a group picker and a default view picker
 
-  self.settings.sanitize = function(data, callback) {
+  self.settings.sanitize = function(req, data, callback) {
     var ok = {};
     // Selecting nonexistent groups isn't dangerous, it's just silly.
     // So just make sure we have an array of strings
