@@ -1,26 +1,58 @@
 {% extends 'newBase.html' %}
 {% include 'snippetMacros.html' %}
 
+{% block buttons %}
+  {{ snippetNewControls() }}
+{% endblock %}
+
+
+{% block topButtons %}
+{% endblock %}
+
 {% block insideForm %}
-
   {{ snippetAllFields(fields, { before: 'thumbnail' }) }}
+  <div class="apos-modal-tabs">
+    <div class="apos-modal-tab-control">
+      <div class="apos-modal-tab-title apos-active" data-tab="groupPermissions">
+        Permissions
+      </div>
+      <div class="apos-modal-tab-title" data-tab="groupPeople">
+        People
+      </div>
+      <div class="apos-modal-tab-title" data-tab="groupDescription">
+        Description
+      </div>
+    </div>
 
-  {% for permission in type.permissions %}
-    {{ formBoolean(permission.value, permission.label) }}
-  {% endfor %}
+    <div class="apos-modal-tab apos-active" data-tab-id="groupPermissions">
+      <div class="apos-modal-tab-content">
+        {% for permission in type.permissions %}
+          {{ formBoolean(permission.value, permission.label) }}
+        {% endfor %}
+      </div>
+    </div>
 
-  {{ snippetSelective('people', 'People', {
-    placeholder: 'Type Name Here',
-    extras: [
-      {
-        name: 'jobTitle',
-        label: 'Job Title',
-        type: 'text'
-      }
-    }
-  }) }}
+    <div class="apos-modal-tab" data-tab-id="groupPeople">
+      <div class="apos-modal-tab-content">
+        {{ snippetSelective('people', 'People', {
+          placeholder: 'Type Name Here',
+          extras: [
+            {
+              name: 'jobTitle',
+              label: 'Job Title',
+              type: 'text'
+            }
+          }
+        }) }}
+      </div>
+    </div>
 
-  {{ snippetAllFields(fields, { from: 'thumbnail' }) }}
+    <div class="apos-modal-tab" data-tab-id="groupDescription">
+      <div class="apos-modal-tab-content">
+        {{ snippetAllFields(fields, { from: 'thumbnail' }) }}
+      </div>
+    </div>
 
+  </div>
 {% endblock %}
 
