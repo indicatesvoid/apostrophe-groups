@@ -580,7 +580,6 @@ groups.Groups = function(optionsArg, callback) {
           person.login = true;
           person.username = person.slug;
           var _password = randomWords({ exactly: 5, join: ' ' });
-          console.log('Password for ' + person.slug + ' is: ' + _password);
           person.password = self._apos.hashPassword(_password);
         }
         // Insert the pages properly so we don't have
@@ -599,6 +598,32 @@ groups.Groups = function(optionsArg, callback) {
         });
       }
     }
+  };
+
+  // Ensure that a group with the specified name exists. If it
+  // does not already exist, it is created with the specified
+  // permissions. The permissions of an existing group are
+  // NOT changed. Invokes the callback with (err, group)
+
+  self.ensureExists = function(req, name, permissions, callback) {
+    return self.getOne(req, { title: name }, { permissions: false }, function(err, group) {
+      if (err) {
+        return callback(err);
+      }
+      if (group) {
+        return callback(null, group);
+      }
+      group = {
+        title: name,
+        permissions: permissions || []
+      };
+      return self.putOne(req, { permissions: false }, group, function(err) {
+        if (err) {
+          return callback(err);
+        }
+        return callback(null, group);
+      });
+    });
   };
 
   if (callback) {
