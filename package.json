@@ -1,6 +1,6 @@
 {
   "name": "apostrophe-groups",
-  "version": "0.5.10",
+  "version": "0.5.11",
   "description": "Groups for apostrophe-people, a component of the Apostrophe content management system",
   "main": "index.js",
   "scripts": {
