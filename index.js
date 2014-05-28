@@ -22,7 +22,7 @@ groups.Groups = function(optionsArg, callback) {
     label: 'Directory',
     pluralLabel: 'Groups',
     instanceLabel: 'Group',
-    icon: 'directory',
+    icon: 'icon-directory',
     menuName: 'aposGroupsMenu',
     peopleType: 'people',
     browser: {
