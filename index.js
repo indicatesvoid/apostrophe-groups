@@ -89,6 +89,8 @@ groups.Groups = function(optionsArg, callback) {
           });
         }
       });
+      // event allowing permissions list to be extended
+      self._apos.emit('permissions', permissions);
     }
 
     // Make sure the permissions list is visible to our asset templates and to browser-side JS
