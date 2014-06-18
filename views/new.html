@@ -10,7 +10,7 @@
 {% endblock %}
 
 {% block insideForm %}
-  {{ snippetAllFields(fields, { before: 'thumbnail' }) }}
+  {{ snippetAllFields(fields, { before: 'published' }) }}
   <div class="apos-modal-tabs">
     <div class="apos-modal-tab-control">
       <div class="apos-modal-tab-title apos-active" data-tab="groupPermissions">
@@ -21,6 +21,9 @@
       </div>
       <div class="apos-modal-tab-title" data-tab="groupDescription">
         Description
+      </div>
+      <div class="apos-modal-tab-title" data-tab="groupAdmin">
+        Admin
       </div>
     </div>
 
@@ -50,6 +53,13 @@
     <div class="apos-modal-tab" data-tab-id="groupDescription">
       <div class="apos-modal-tab-content">
         {{ snippetAllFields(fields, { from: 'thumbnail' }) }}
+      </div>
+    </div>
+
+    <div class="apos-modal-tab" data-tab-id="groupAdmin">
+      <div class="apos-modal-tab-content">
+        {{ snippetBoolean('published', 'Published') }}
+        {{ snippetTags('tags', 'Tags') }}
       </div>
     </div>
 
