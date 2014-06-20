@@ -10,13 +10,15 @@ function groups(options, callback) {
   return new groups.Groups(options, callback);
 }
 
-groups.Groups = function(optionsArg, callback) {
+groups.Groups = function(options, callback) {
   var self = this;
+
+  var schemas = options.schemas;
 
   // Only admins can edit this data type
   self._adminOnly = true;
 
-  var options = {
+  _.defaults(options, {
     instance: 'group',
     name: 'groups',
     label: 'Directory',
@@ -28,12 +30,119 @@ groups.Groups = function(optionsArg, callback) {
     browser: {
       // Options to be passed to the browser side constructor
       options: {
-        peopleSortable: optionsArg.peopleSortable
+        peopleSortable: options.peopleSortable
       }
     }
-  };
+  });
 
-  extend(true, options, optionsArg);
+  options.addFields = [
+    {
+      type: 'a2Permissions',
+      label: 'Permissions',
+      name: 'permissions'
+    },
+    {
+      type: 'a2People',
+      label: 'People',
+      name: 'people'
+    }
+  ].concat(options.addFields || []);
+
+  // If somebody REALLY doesn't want to group their fields,
+  // take the hint, otherwise supply a default behavior
+  if (options.groupFields !== false) {
+    options.groupFields = options.groupFields ||
+      // We don't list the title field so it stays on top
+      [
+        {
+          name: 'groupPermissions',
+          label: 'Permissions',
+          fields: [
+            'permissions'
+          ]
+        },
+        {
+          name: 'groupPeople',
+          label: 'People',
+          icon: 'user',
+          fields: [
+            'people'
+          ]
+        },
+        {
+          name: 'groupDescription',
+          label: 'Description',
+          fields: [
+            'thumbnail', 'body'
+          ]
+        },
+        {
+          name: 'groupAdmin',
+          label: 'Admin',
+          icon: 'metadata',
+          fields: [
+            'published', 'tags'
+          ]
+        }
+      ];
+  }
+
+  // Specialized schema field type just for the permissions
+  // selectors. The field name is ignored and it works
+  // exactly as it did before we had it as a field type. We
+  // refactored this way so that grouping the people control
+  // into a tab would be possible.
+
+
+  schemas.addFieldType({
+    name: 'a2Permissions',
+    render: function(data) {
+      data.permissions = self._permissions;
+      return self.render('permissionsField', data);
+    },
+    converters: {
+      form: function(req, data, name, snippet, field, callback) {
+        snippet.permissions = [];
+        _.each(self._permissions, function(permission) {
+          if (self._apos.sanitizeBoolean(data[permission.value])) {
+            snippet.permissions.push(permission.value);
+          }
+        });
+        return callback(null);
+      },
+      csv: function(req, data, object, field, callback) {
+        snippet[field.name] = [];
+        var received = data[name].split(/,\s*/);
+        snippet[field.name] = _.intersection(received, self._permissions);
+        return callback(null);
+      }
+    }
+  });
+
+  // Specialized schema field type just for the people/group
+  // relationship. The field name is ignored and it works
+  // exactly as it did before we had it as a field type. We
+  // refactored this way so that grouping the people control
+  // into a tab would be possible.
+
+  schemas.addFieldType({
+    name: 'a2People',
+    render: function(data) {
+      return self.render('peopleField', data);
+    },
+    converters: {
+      form: function(req, data, name, snippet, field, callback) {
+        // Let afterSave do it, because we don't have an id yet
+        // if we're a new group.
+        return callback(null);
+      },
+
+      csv: function(req, data, name, snippet, field, callback) {
+        // No CSV import of group memberships for now
+        return callback(null);
+      }
+    }
+  });
 
   self._peopleSortable = options.peopleSortable;
 
@@ -113,66 +222,6 @@ groups.Groups = function(optionsArg, callback) {
     return superPushAllAssets();
   };
 
-  self.beforeSave = function(req, data, snippet, callback) {
-    snippet.permissions = [];
-    _.each(self._permissions, function(permission) {
-      if (self._apos.sanitizeBoolean(data[permission.value])) {
-        snippet.permissions.push(permission.value);
-      }
-    });
-    return callback(null);
-  };
-
-  self.afterSave = function(req, data, snippet, callback) {
-    // The person-group relationship is actually stored in arrays in
-    // the person objects. Arrays of IDs are a good choice because
-    // they can be indexed. Blast them with $addToSet and $in, and
-    // conversely, $pull and $nin.
-
-    var personIds = _.map(data._peopleInfo || [], function(personInfo) {
-      return self._apos.sanitizeString(personInfo.value);
-    });
-    async.series([addId, addExtras, removeId, removeExtras], callback);
-
-    function addId(callback) {
-      return self._apos.pages.update({ _id: { $in: personIds } }, { $addToSet: { groupIds: snippet._id } }, { multi: true }, callback);
-    }
-
-    function removeId(callback) {
-      return self._apos.pages.update({ type: self.getPeopleInstance(), _id: { $nin: personIds } }, { $pull: { groupIds: snippet._id } }, { multi: true }, callback);
-    }
-
-    // Extras like job titles are stored in an object property
-    // for each person:
-    //
-    // { title: 'Bob Smith', groupExtras: { someGroupId: { jobTitle: 'Flosser' } } }
-
-    function addExtras(callback) {
-      var n = 0;
-      async.eachSeries(data._peopleInfo || [], function(personInfo, callback) {
-        var set = { $set: { } };
-        var extras = { };
-        // Clone the object so we can modify it
-        extend(true, extras, personInfo);
-        // We're setting the rank.
-        if (self._peopleSortable) {
-          extras.rank = n;
-        }
-        // Do not redundantly store the ID
-        delete extras.value;
-        set.$set['groupExtras.' + snippet._id] = extras;
-        n++; //We're incrementing our counter for sort order
-        return self._apos.pages.update({ _id: personInfo.value }, set, callback);
-      }, callback);
-    }
-
-    function removeExtras(callback) {
-      var unset = { $unset: { } };
-      unset.$unset['groupExtras.' + snippet._id] = 1;
-      return self._apos.pages.update({ type: self.getPeopleInstance(), _id: { $nin: personIds } }, unset, callback);
-    }
-  };
-
   // Join groups with their people if not explicitly turned off
   var superGet = self.get;
   self.get = function(req, criteria, options, callback) {
@@ -226,6 +275,56 @@ groups.Groups = function(optionsArg, callback) {
         });
       }
     });
+  };
+
+  self.afterSave = function(req, data, snippet, callback) {
+    // The person-group relationship is actually stored in arrays in
+    // the person objects. Arrays of IDs are a good choice because
+    // they can be indexed. Blast them with $addToSet and $in, and
+    // conversely, $pull and $nin.
+
+    var personIds = _.map(data._peopleInfo || [], function(personInfo) {
+      return self._apos.sanitizeString(personInfo.value);
+    });
+    async.series([addId, addExtras, removeId, removeExtras], callback);
+
+    function addId(callback) {
+      return self._apos.pages.update({ _id: { $in: personIds } }, { $addToSet: { groupIds: snippet._id } }, { multi: true }, callback);
+    }
+
+    function removeId(callback) {
+      return self._apos.pages.update({ type: self.getPeopleInstance(), _id: { $nin: personIds } }, { $pull: { groupIds: snippet._id } }, { multi: true }, callback);
+    }
+
+    // Extras like job titles are stored in an object property
+    // for each person:
+    //
+    // { title: 'Bob Smith', groupExtras: { someGroupId: { jobTitle: 'Flosser' } } }
+
+    function addExtras(callback) {
+      var n = 0;
+      async.eachSeries(data._peopleInfo || [], function(personInfo, callback) {
+        var set = { $set: { } };
+        var extras = { };
+        // Clone the object so we can modify it
+        extend(true, extras, personInfo);
+        // We're setting the rank.
+        if (self._peopleSortable) {
+          extras.rank = n;
+        }
+        // Do not redundantly store the ID
+        delete extras.value;
+        set.$set['groupExtras.' + snippet._id] = extras;
+        n++; //We're incrementing our counter for sort order
+        return self._apos.pages.update({ _id: personInfo.value }, set, callback);
+      }, callback);
+    }
+
+    function removeExtras(callback) {
+      var unset = { $unset: { } };
+      unset.$unset['groupExtras.' + snippet._id] = 1;
+      return self._apos.pages.update({ type: self.getPeopleInstance(), _id: { $nin: personIds } }, unset, callback);
+    }
   };
 
   // Allow a directory page to be locked down by group

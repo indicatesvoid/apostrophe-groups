@@ -1,12 +1,50 @@
 // JavaScript which enables editing of this module's content belongs here.
 
-function AposGroups(optionsArg) {
+function AposGroups(options) {
   var self = this;
-  var options = {
-    instance: 'group',
-    name: 'groups'
-  };
-  $.extend(options, optionsArg);
+
+  aposSchemas.addFieldType({
+    name: 'a2Permissions',
+    displayer: function(snippet, name, $field, $el, field, callback) {
+      _.each(apos.data.aposGroups.permissions, function(permission) {
+        $el.findByName(permission.value).val(_.contains(snippet.permissions || [], permission.value) ? '1' : '0');
+      });
+
+      return callback();
+    },
+    converter: function(data, name, $field, $el, field, callback) {
+      _.each(apos.data.aposGroups.permissions, function(permission) {
+        data[permission.value] = $el.findByName(permission.value).val();
+      });
+      return callback();
+    }
+  });
+
+  aposSchemas.addFieldType({
+    name: 'a2People',
+    displayer: function(snippet, name, $field, $el, field, callback) {
+      console.log(snippet._people);
+      $el.find('[data-name="people"]').selective({
+        sortable: options.peopleSortable,
+        extras: true,
+        source: aposPages.getType('people')._action + '/autocomplete',
+        data: _.map(snippet._people || [], function(person) {
+          var data = { label: person.title, value: person._id };
+          if (person.groupExtras && person.groupExtras[snippet._id]) {
+            $.extend(true, data, person.groupExtras[snippet._id]);
+          }
+          return data;
+        })
+      });
+      return callback();
+    },
+    converter: function(data, name, $field, $el, field, callback) {
+      data._peopleInfo = $el.find('[data-name="people"]').selective('get', { incomplete: true });
+      console.log(data);
+      return callback();
+    }
+  });
+
   AposSnippets.call(self, options);
 
   // PAGE SETTINGS FOR THIS TYPE
@@ -33,34 +71,6 @@ function AposGroups(optionsArg) {
       $details.findByName('defaultView').val(data.defaultView || 'groups');
       $details.findByName('showThumbnail').val(data.showThumbnail ? '1' : '0');
     }
-  };
-
-  self.beforeSave = function($el, data, callback) {
-    data._peopleInfo = $el.find('[data-name="people"]').selective('get', { incomplete: true });
-    _.each(apos.data.aposGroups.permissions, function(permission) {
-      data[permission.value] = $el.findByName(permission.value).val();
-    });
-    return callback();
-  };
-
-  self.afterPopulatingEditor = function($el, snippet, callback) {
-    $el.findByName('permissions').val(apos.tagsToString(snippet.permissions));
-    $el.find('[data-name="people"]').selective({
-      sortable: options.peopleSortable,
-      extras: true,
-      source: aposPages.getType('people')._action + '/autocomplete',
-      data: _.map(snippet._people || [], function(person) {
-        var data = { label: person.title, value: person._id };
-        if (person.groupExtras && person.groupExtras[snippet._id]) {
-          $.extend(true, data, person.groupExtras[snippet._id]);
-        }
-        return data;
-      })
-    });
-    _.each(apos.data.aposGroups.permissions, function(permission) {
-      $el.findByName(permission.value).val(_.contains(snippet.permissions || [], permission.value) ? '1' : '0');
-    });
-    return callback();
   };
 
   self.addingToManager = function($el, $snippet, snippet) {
