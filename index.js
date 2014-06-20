@@ -12,7 +12,7 @@ function groups(options, callback) {
 
 groups.Groups = function(optionsArg, callback) {
   var self = this;
-
+  var schemas = optionsArg.schemas;
   // Only admins can edit this data type
   self._adminOnly = true;
 
@@ -25,13 +25,30 @@ groups.Groups = function(optionsArg, callback) {
     icon: 'icon-directory',
     menuName: 'aposGroupsMenu',
     peopleType: 'people',
-    browser: {
-      // Options to be passed to the browser side constructor
-      options: {
-        peopleSortable: optionsArg.peopleSortable
-      }
-    }
   };
+
+  options.addFields = [
+    {
+      type: 'permissions',
+      label: 'Permissions',
+      name: 'permissions'
+    },
+    {
+      type: 'joinByArray',
+      label: 'People',
+      name: '_people',
+      sortable: true,
+      idsField: 'personIds',
+      relationshipsField: 'personExtras',
+      relationship: [
+        {
+          name: 'jobTitle',
+          label: 'Job Title',
+          type: 'string'
+        }
+      ]
+    }
+  ].concat(options.addFields || []);
 
   extend(true, options, optionsArg);
 
@@ -57,6 +74,31 @@ groups.Groups = function(optionsArg, callback) {
 
   function addRoutes() {
   }
+
+  schemas.addFieldType({
+    name: 'permissions',
+    render: function(data) {
+      data.permissions = self._permissions;
+      return self.render('permissions');
+    },
+    converters: {
+      form: function(req, data, name, snippet, field, callback) {
+        snippet.permissions = [];
+        _.each(self._permissions, function(permission) {
+          if (self._apos.sanitizeBoolean(data[permission.value])) {
+            snippet.permissions.push(permission.value);
+          }
+        });
+        return callback(null);
+      },
+      csv: function(req, data, object, field, callback) {
+        snippet.permissions = [];
+        var received = data[name].split(/,\s*/);
+        snippet.permissions = _.intersection(received, self._permissions);
+        return callback(null);
+      }
+    }
+  });
 
   // Call the base class constructor. Don't pass the callback, we want to invoke it
   // ourselves after adding methods
@@ -113,66 +155,6 @@ groups.Groups = function(optionsArg, callback) {
     return superPushAllAssets();
   };
 
-  self.beforeSave = function(req, data, snippet, callback) {
-    snippet.permissions = [];
-    _.each(self._permissions, function(permission) {
-      if (self._apos.sanitizeBoolean(data[permission.value])) {
-        snippet.permissions.push(permission.value);
-      }
-    });
-    return callback(null);
-  };
-
-  self.afterSave = function(req, data, snippet, callback) {
-    // The person-group relationship is actually stored in arrays in
-    // the person objects. Arrays of IDs are a good choice because
-    // they can be indexed. Blast them with $addToSet and $in, and
-    // conversely, $pull and $nin.
-
-    var personIds = _.map(data._peopleInfo || [], function(personInfo) {
-      return self._apos.sanitizeString(personInfo.value);
-    });
-    async.series([addId, addExtras, removeId, removeExtras], callback);
-
-    function addId(callback) {
-      return self._apos.pages.update({ _id: { $in: personIds } }, { $addToSet: { groupIds: snippet._id } }, { multi: true }, callback);
-    }
-
-    function removeId(callback) {
-      return self._apos.pages.update({ type: self.getPeopleInstance(), _id: { $nin: personIds } }, { $pull: { groupIds: snippet._id } }, { multi: true }, callback);
-    }
-
-    // Extras like job titles are stored in an object property
-    // for each person:
-    //
-    // { title: 'Bob Smith', groupExtras: { someGroupId: { jobTitle: 'Flosser' } } }
-
-    function addExtras(callback) {
-      var n = 0;
-      async.eachSeries(data._peopleInfo || [], function(personInfo, callback) {
-        var set = { $set: { } };
-        var extras = { };
-        // Clone the object so we can modify it
-        extend(true, extras, personInfo);
-        // We're setting the rank.
-        if (self._peopleSortable) {
-          extras.rank = n;
-        }
-        // Do not redundantly store the ID
-        delete extras.value;
-        set.$set['groupExtras.' + snippet._id] = extras;
-        n++; //We're incrementing our counter for sort order
-        return self._apos.pages.update({ _id: personInfo.value }, set, callback);
-      }, callback);
-    }
-
-    function removeExtras(callback) {
-      var unset = { $unset: { } };
-      unset.$unset['groupExtras.' + snippet._id] = 1;
-      return self._apos.pages.update({ type: self.getPeopleInstance(), _id: { $nin: personIds } }, unset, callback);
-    }
-  };
-
   // Join groups with their people if not explicitly turned off
   var superGet = self.get;
   self.get = function(req, criteria, options, callback) {
@@ -192,40 +174,7 @@ groups.Groups = function(optionsArg, callback) {
       criteria = { $and: $and };
     }
 
-    return superGet.call(self, req, criteria, options, function(err, results) {
-      if (err) {
-        return callback(err);
-      }
-      var snippets = results.snippets;
-      async.series([join], function(err) {
-        if (err) {
-          return callback(err);
-        }
-        return callback(null, results);
-      });
-      function join(callback) {
-        if (!getPeople) {
-          return callback(null);
-        }
-        var getOptions = {
-          getGroups: false,
-          permalink: options.permalink
-        };
-        if (self._peopleSortable && (snippets.length === 1))  {
-          var sortByString = "groupExtras." + snippets[0]._id + ".rank";
-          getOptions.sort = {};
-          getOptions.sort[sortByString] = 1;
-        }
-        // We want to permalink to the same directory page, if any
-        return self._apos.joinByArrayReverse(req, snippets, 'groupIds', undefined, '_people', { get: self.getPeopleManager().get, getOptions: getOptions }, function(err) {
-          if (err) {
-            return callback(err);
-          }
-
-          return callback(null, results);
-        });
-      }
-    });
+    return superGet.call(self, req, criteria, options, callback);
   };
 
   // Allow a directory page to be locked down by group

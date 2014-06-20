@@ -7,6 +7,25 @@ function AposGroups(optionsArg) {
     name: 'groups'
   };
   $.extend(options, optionsArg);
+
+  aposSchemas.addFieldType({
+    name: 'permissions',
+    displayer: function(snippet, name, $field, $el, field, callback) {
+      _.each(apos.data.aposGroups.permissions, function(permission) {
+        $el.findByName(permission.value).val(_.contains(snippet.permissions || [], permission.value) ? '1' : '0');
+      });
+
+      return callback();
+    },
+    converter: function(data, name, $field, $el, field, callback) {
+      _.each(apos.data.aposGroups.permissions, function(permission) {
+        data[permission.value] = $el.findByName(permission.value).val();
+      });
+      return callback();
+    }
+  });
+
+
   AposSnippets.call(self, options);
 
   // PAGE SETTINGS FOR THIS TYPE
@@ -37,14 +56,11 @@ function AposGroups(optionsArg) {
 
   self.beforeSave = function($el, data, callback) {
     data._peopleInfo = $el.find('[data-name="people"]').selective('get', { incomplete: true });
-    _.each(apos.data.aposGroups.permissions, function(permission) {
-      data[permission.value] = $el.findByName(permission.value).val();
-    });
     return callback();
   };
 
   self.afterPopulatingEditor = function($el, snippet, callback) {
-    $el.findByName('permissions').val(apos.tagsToString(snippet.permissions));
+    // $el.findByName('permissions').val(apos.tagsToString(snippet.permissions));
     $el.find('[data-name="people"]').selective({
       sortable: options.peopleSortable,
       extras: true,
@@ -56,9 +72,6 @@ function AposGroups(optionsArg) {
         }
         return data;
       })
-    });
-    _.each(apos.data.aposGroups.permissions, function(permission) {
-      $el.findByName(permission.value).val(_.contains(snippet.permissions || [], permission.value) ? '1' : '0');
     });
     return callback();
   };
