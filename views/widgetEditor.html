@@ -1,17 +1,17 @@
 {% extends "baseWidgetEditor.html" %}
 {% include "formMacros.html" %}
 
-{% block widgetVars %}
-  {% set widgetClass = 'apos-groups-widget-editor' %}
+{% block modalClass %}
+  {{super()}} apos-groups-widget-editor
 {% endblock %}
 
-{% block title %}
+{% block modalLabel %}
   {{ __('Display Groups') }}
 {% endblock %}
 
-{% block instructions %}
-{{ __('Start typing the name of a group, then click on the suggestions that appear to insert them.
-Or just use tags to pull in groups.') }}
+{% block modalInstructions %}
+<p>{{ __('Start typing the name of a group, then click on the suggestions that appear to insert them.
+Or just use tags to pull in groups.') }}</p>
 {% endblock %}
 
 {% block formBody %}
@@ -34,4 +34,3 @@ Or just use tags to pull in groups.') }}
 </fieldset>
 
 {% endblock %}
-
