@@ -36,7 +36,7 @@
       <div class="apos-person-body">{{ aposArea(person, 'body') }}</div>
       {% if person._groups %}
         <div class="apos-person-groups">
-          Affiliated with:
+          {{ __('Affiliated with:') }}
           <ul>
             {% for group in person._groups %}
               <li>
