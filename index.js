@@ -44,7 +44,14 @@ groups.Groups = function(options, callback) {
     {
       type: 'a2People',
       label: 'People',
-      name: 'people'
+      name: 'people',
+      extras: (options.peopleExtras !== undefined) ? options.peopleExtras : [
+        {
+          name: 'jobTitle',
+          label: 'Job Title',
+          type: 'text'
+        }
+      ]
     }
   ].concat(options.addFields || []);
 
@@ -284,7 +291,7 @@ groups.Groups = function(options, callback) {
     // conversely, $pull and $nin.
 
     var personIds = _.map(data._peopleInfo || [], function(personInfo) {
-      return self._apos.sanitizeString(personInfo.value);
+      return self._apos.sanitizeString(personInfo.value || personInfo);
     });
     async.series([addId, addExtras, removeId, removeExtras], callback);
 

@@ -23,10 +23,9 @@ function AposGroups(options) {
   aposSchemas.addFieldType({
     name: 'a2People',
     displayer: function(snippet, name, $field, $el, field, callback) {
-      console.log(snippet._people);
       $el.find('[data-name="people"]').selective({
         sortable: options.peopleSortable,
-        extras: true,
+        extras: field.extras,
         source: aposPages.getType('people')._action + '/autocomplete',
         data: _.map(snippet._people || [], function(person) {
           var data = { label: person.title, value: person._id };
