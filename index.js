@@ -117,7 +117,7 @@ groups.Groups = function(options, callback) {
         });
         return callback(null);
       },
-      csv: function(req, data, object, field, callback) {
+      csv: function(req, data, name, snippet, field, callback) {
         snippet[field.name] = [];
         var received = data[name].split(/,\s*/);
         snippet[field.name] = _.intersection(received, self._permissions);
