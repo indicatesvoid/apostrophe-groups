@@ -504,8 +504,10 @@ groups.Groups = function(options, callback) {
       req.extras.letter = req.query.letter;
     }
 
-    if (req.query.q) {
-      options.q = req.query.q;
+    options.search = req.query.search || req.query.q;
+
+    if (req.query.autocomplete) {
+      options.autocomplete = req.query.autocomplete;
     }
 
      if (self._peopleSortable && settings.groupIds  && (settings.groupIds.length === 1))  {
