@@ -510,14 +510,16 @@ groups.Groups = function(options, callback) {
       options.autocomplete = req.query.autocomplete;
     }
 
-     if (self._peopleSortable && settings.groupIds  && (settings.groupIds.length === 1))  {
+    if (self._peopleSortable && settings.groupIds  && (settings.groupIds.length === 1))  {
       var sortByString = "groupExtras." + settings.groupIds[0] + ".rank";
       options.sort = {};
       options.sort[sortByString] = 1;
     }
 
-    self.addPager(req, options);
+    self.afterIndexPeopleCriteria(req, criteria, options);
 
+    self.addPager(req, options);
+    console.log("In the module, the criteria is, ", criteria);
     options.permalink = req.bestPage;
     return self.getPeopleManager().get(req, criteria, options, function(err, results) {
       if (err) {
@@ -538,6 +540,11 @@ groups.Groups = function(options, callback) {
       }
       return callback(null);
     });
+  };
+
+  // A last chance to adjust the criteria and options to be passed to
+  // self.get by indexPeople
+  self.afterIndexPeopleCriteria = function(req, criteria, options) {
   };
 
   self.indexGroups = function(req, callback) {
@@ -743,4 +750,3 @@ groups.Groups = function(options, callback) {
     process.nextTick(function() { return callback(null); });
   }
 };
-
