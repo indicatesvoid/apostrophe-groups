@@ -519,7 +519,6 @@ groups.Groups = function(options, callback) {
     self.afterIndexPeopleCriteria(req, criteria, options);
 
     self.addPager(req, options);
-    console.log("In the module, the criteria is, ", criteria);
     options.permalink = req.bestPage;
     return self.getPeopleManager().get(req, criteria, options, function(err, results) {
       if (err) {
