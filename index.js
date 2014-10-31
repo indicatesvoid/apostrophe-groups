@@ -477,11 +477,11 @@ groups.Groups = function(options, callback) {
         return callback(null);
       }
       req.template = self.renderer('showPerson');
-      return self.beforeShowPerson(req, callback);
+      return self.beforeShowPerson(req, person, callback);
     });
   };
 
-  self.beforeShowPerson = function(req, callback) {
+  self.beforeShowPerson = function(req, person, callback) {
     return callback(null);
   };
 
