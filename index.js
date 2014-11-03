@@ -477,8 +477,12 @@ groups.Groups = function(options, callback) {
         return callback(null);
       }
       req.template = self.renderer('showPerson');
-      return callback(null);
+      return self.beforeShowPerson(req, person, callback);
     });
+  };
+
+  self.beforeShowPerson = function(req, person, callback) {
+    return callback(null);
   };
 
   self.indexPeople = function(req, callback) {
