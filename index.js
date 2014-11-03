@@ -186,7 +186,7 @@ groups.Groups = function(options, callback) {
       permissions = options.permissions;
     } else {
       // Base permissions list
-      permissions = [ { value: 'guest', label: 'Guest' }, { value: 'edit', label: 'Editor' }, { value: 'admin', label: 'Admin: All' } ];
+      permissions = [ { value: 'guest', label: 'Guest' }, { value: 'edit', label: 'Editor' }, { value: 'admin', label: 'Admin: All' }, { value: 'edit-file', label: 'Edit: Files' } ];
       // Type-specific admin permissions
       var instanceTypes = self._pages.getAllInstanceTypeNames();
       _.each(instanceTypes, function(type) {
