@@ -39,38 +39,11 @@ function AposGroups(options) {
     },
     converter: function(data, name, $field, $el, field, callback) {
       data._peopleInfo = $el.find('[data-name="people"]').selective('get', { incomplete: true });
-      console.log(data);
       return callback();
     }
   });
 
   AposSnippets.call(self, options);
-
-  // PAGE SETTINGS FOR THIS TYPE
-
-  self.settings = {
-    serialize: function($el, $details) {
-      var data = {
-        groupIds: $details.find('[data-name="groupIds"]').selective('get', { incomplete: true }),
-        notGroupIds: $details.find('[data-name="notGroupIds"]').selective('get', { incomplete: true }),
-        defaultView: $details.findByName('defaultView').val(),
-        showThumbnail: $details.findByName('showThumbnail').val()
-      };
-      return data;
-    },
-    unserialize: function(data, $el, $details) {
-      $details.find('[data-name="groupIds"]').selective({
-        source: self._action + '/autocomplete',
-        data: data.groupIds || []
-      });
-      $details.find('[data-name="notGroupIds"]').selective({
-        source: self._action + '/autocomplete',
-        data: data.notGroupIds || []
-      });
-      $details.findByName('defaultView').val(data.defaultView || 'groups');
-      $details.findByName('showThumbnail').val(data.showThumbnail ? '1' : '0');
-    }
-  };
 
   self.addingToManager = function($el, $snippet, snippet) {
     $snippet.find('[data-published]').val(snippet.published ? 'Yes' : 'No');

@@ -55,6 +55,45 @@ groups.Groups = function(options, callback) {
     }
   ].concat(options.addFields || []);
 
+  _.defaults(options.indexSchema, {});
+
+  options.indexSchema.removeFields = [
+    'withTags', 'notTags'
+  ].concat(options.indexSchema.removeFields || []);
+
+  options.indexSchema.addFields = [
+    {
+      name: '_groups',
+      label: 'Members Of These Groups Only',
+      type: 'joinByArray',
+      withType: options.instance,
+      idsField: 'groupIds'
+    },
+    {
+      name: '_notGroups',
+      label: 'Never Members Of These Groups',
+      type: 'joinByArray',
+      withType: options.instance,
+      idsField: 'notGroupIds'
+    },
+    {
+      name: 'defaultView',
+      label: 'Default View',
+      type: 'select',
+      def: 'groups',
+      choices: [
+        { value: 'groups', label: "Show Groups" },
+        { value: 'people', label: "Show People" }
+      ]
+    },
+    {
+      name: 'showThumbnail',
+      label: 'Headshots In List View',
+      type: 'boolean',
+      def: false
+    }
+  ].concat(options.indexSchema.addFields || []);
+
   // If somebody REALLY doesn't want to group their fields,
   // take the hint, otherwise supply a default behavior
   if (options.groupFields !== false) {
@@ -358,20 +397,6 @@ groups.Groups = function(options, callback) {
       snippet.url = page.slug + '/' + snippet.slug;
     }
     return callback(null);
-  };
-
-  // The page settings for a directory page are different from other
-  // collection pages. There's no tag picker, just a group picker and a default view picker
-
-  self.settings.sanitize = function(req, data, callback) {
-    var ok = {};
-    // Selecting nonexistent groups isn't dangerous, it's just silly.
-    // So just make sure we have an array of strings
-    ok.groupIds = self._apos.sanitizeTags(data.groupIds);
-    ok.notGroupIds = self._apos.sanitizeTags(data.notGroupIds);
-    ok.defaultView = (data.defaultView === 'people') ? 'people' : 'groups';
-    ok.showThumbnail = self._apos.sanitizeBoolean(data.showThumbnail);
-    return callback(null, ok);
   };
 
   // Returns either 'people' or 'groups', as determined by the style picker
