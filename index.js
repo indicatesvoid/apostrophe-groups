@@ -55,7 +55,9 @@ groups.Groups = function(options, callback) {
     }
   ].concat(options.addFields || []);
 
-  _.defaults(options.indexSchema, {});
+  if (!options.indexSchema) {
+    options.indexSchema = {};
+  }
 
   options.indexSchema.removeFields = [
     'withTags', 'notTags'
