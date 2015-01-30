@@ -27,13 +27,18 @@ groups.Groups = function(options, callback) {
     icon: 'icon-directory',
     menuName: 'aposGroupsMenu',
     peopleType: 'people',
-    browser: {
-      // Options to be passed to the browser side constructor
-      options: {
-        peopleSortable: options.peopleSortable
-      }
-    }
+    browser: {}
   });
+
+  if (options.peopleSortable) {
+    options.browser.peopleSortable = true;
+  }
+
+  // Fix to allow sortable to work properly when
+  // other "extras" are shut off
+  if (options.peopleExtras === false) {
+    options.peopleExtras = [];
+  }
 
   options.addFields = [
     {
