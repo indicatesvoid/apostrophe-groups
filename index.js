@@ -540,6 +540,11 @@ groups.Groups = function(options, callback) {
       req.extras.letter = req.query.letter;
     }
 
+    if (req.query.tags) {
+      options.tags = req.query.tags;
+      req.extras.tags = req.query.tags;
+    }
+
     options.search = req.query.search || req.query.q;
 
     if (req.query.autocomplete) {
