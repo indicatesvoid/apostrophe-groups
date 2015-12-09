@@ -738,7 +738,9 @@ groups.Groups = function(options, callback) {
           person.login = true;
           person.username = person.slug;
           var _password = randomWords({ exactly: 5, join: ' ' });
-          person.password = self._apos.hashPassword(_password);
+          self._apos.hashPassword(_password, function(hash) {
+            person.password = hash;
+          });
         }
         // Insert the pages properly so we don't have
         // issues with searchability
